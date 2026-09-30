@@ -2,7 +2,7 @@
 
 Status: proposal for the team to agree on (30 September, updated around 19:45 with the customer-value review). Where this differs from the first tasks in `docs/PLAYBOOK.md`, this plan wins.
 
-Why a customer would want this, the five-angle review behind it, and the Belgian facts with sources are in [customer-value.md](customer-value.md).
+Why a customer would want this, the five-angle review behind it, and the Belgian facts with sources are in [customer-value.md](customer-value.md). Parts of the teammate's [Month Ahead proposal](../month-ahead-kbc-idea.md) are merged in: knowing each customer's usual month, a "Coming up" panel, expandable explanations, a cap on cards, a measured scale run, and its honest limitations. Its forecast goes on the vision slide.
 
 ## The idea in one paragraph
 
@@ -13,6 +13,14 @@ KBC wants to understand what each customer needs and respond at the right moment
 > For KBC customers going through a life change, we built an engine that notices it, asks before assuming, remembers the answer, and knows when to stay quiet: on 300 synthetic customers it made \<0\> offers to people whose income had stopped, where a segment campaign made 21.
 
 The engine's number comes from the Numbers lane; quote the real one, whatever it is. Two lines we always add: "It never changes credit decisions or prices", and "designed with GDPR and the AI Act in mind" (never "compliant").
+
+Honest limitations we say out loud (from Month Ahead), in the pitch and the README:
+
+- **We only claim what we measure.** All numbers are on synthetic data.
+- **Money outside KBC is invisible.** If a salary or spending goes through another bank, the engine misses it.
+- **New customers have little history**, so the engine knows their usual month less well.
+- **Irregular incomes are harder.** For a freelancer, a month without income can be normal.
+- **We don't know everything KBC Mobile already offers.** We ask the KBC mentors and pitch what is new.
 
 ## What the brief settled
 
@@ -58,6 +66,9 @@ Rules for every card:
 - **"Prefer not to say" and "That's not right" mean silence on that topic for three months**, and the card says so ("we won't ask again until January").
 - **Belgian details come only after the customer answers**, and only the ones verified in [customer-value.md](customer-value.md).
 - **Lock-screen notifications stay discreet** ("You have a message from KBC"), because phones get shared.
+- **At most one card per customer per month** (alert discipline, from Month Ahead).
+- **"Why you see this" can be opened** to show the actual payments behind the card, for example "rent paid on the 3rd in January, February and March; none in April". It is the customer's own data, shown to them.
+- **The customer can correct the engine:** "That's not right" on a card, and "This payment isn't recurring" on the Coming up panel.
 
 ## What the jury sees: one demo page
 
@@ -78,11 +89,19 @@ Not a chatbot (a chatbot waits for the customer to ask; the brief is about KBC n
 │  ...                          │  │ [Prefer not to say]  │         │
 │                               │  │ Why you see this: ...│         │
 │                               │  └──────────────────────┘         │
+│                               │  Coming up (next 30 days):        │
+│                               │  1 Oct  rent          €502        │
+│                               │  2 Oct  salary       +€2,258      │
+│                               │  10 Oct utilities      €64        │
+│                               │  15 Oct insurance      €29        │
+│                               │                                   │
 │                               │  For "protect quietly": the       │
 │                               │  normal app, no promos, plus the  │
 │                               │  staff note on KBC's side         │
 └───────────────────────────────┴──────────────────────────────────┘
 ```
+
+The **Coming up** panel (from Month Ahead) lists the customer's own regular payments for the next 30 days: dates and usual amounts, no balance, no warnings. It gives every customer something useful even in a month without a card. Quiet-protection customers see the same neutral list and nothing else.
 
 In real life the output would appear in channels KBC already has: a card in the KBC Mobile app or a message from Kate (their in-app assistant), a note on the advisor's screen, or an email.
 
@@ -93,7 +112,7 @@ The customer's answer is the core of the idea, not an extra. The engine remember
 | Time | Beat | What is on screen |
 |---|---|---|
 | 0:00 to 0:25 | The problem | C0001 started their first job in April; the bank still files them as a student and keeps sending student offers. C0134's salary stopped in April; the family segment campaign still sent them its usual sales offer in May. Both are being talked at; neither is being noticed |
-| 0:25 to 0:50 | The scan | Move the month to September; every customer is scanned in under a second; most hear nothing this month |
+| 0:25 to 0:50 | The scan | Move the month to September; every customer is scanned in under a second. Most get no card this month, only their Coming up list: "a bank that only speaks when it matters" |
 | 0:50 to 1:20 | Ask before assuming | C0001: the first-salary card asks instead of congratulating. Click "Finished studying, working now": the student offers stop and a short first-job checklist appears (youth holidays) |
 | 1:20 to 1:45 | The customer controls the bank | C0058, rent stopped: click "Prefer not to say". The card disappears and KBC's view shows "no contact on this until January" |
 | 1:45 to 2:20 | Knowing when to stay quiet | Month April: C0009 (late salary) and C0134 (income loss) both get quiet protection; their phones show the normal app with no promos. Month May: C0009's salary arrived and they go back to normal; C0134 stays protected. "The kindest thing a bank can do here is say nothing and stop selling." |
@@ -108,6 +127,10 @@ C0001, C0058, C0009 and C0134 all start in April according to `evals/moments_tru
 ```
  data/sample/*.csv  ─ data.connect() ─►  DuckDB, in memory (a small SQL database inside the app)
         │
+ ⓪ USUAL    moments.usual_month(con, as_of)                 SQL, no AI
+        │   each customer's regular payments: category, usual day, usual amount
+        │   (feeds the absence detectors, the Coming up panel and "why you see this")
+        ▼
  ① DETECT   moments.detect(con, as_of)                      SQL, no AI
         │   one query per moment, run on ALL customers, only using data up to as_of
         ▼
@@ -156,10 +179,18 @@ Cost grows with the number of moments, not the number of customers. The Numbers 
 
 Vision line, from the blank-slate review: *"Help me need less from you, even when that earns you less."*
 
+From the teammate's Month Ahead proposal, for the vision slide and credited to them:
+
+- **Life moments shift the forecast.** When a customer confirms "I'm moving in November", the months ahead adjust: deposit, double rent, moving costs. Our engine finds and confirms the moment; their forecast shows what it means for the months ahead.
+- **Yearly bills** (car insurance in December) and setting money aside for them in advance.
+- **"Been there"** (another teammate's idea): after a customer confirms a moment such as buying a home, show what others who went through it typically experienced, for example "others who bought a home spent about €X extra a month in the first six months". Only a bank with millions of customers can do this, and it is where Month Ahead's life-moment costs would come from instead of invented figures. Guardrails: group averages only, with a minimum group size (for example 100); shown only after the customer confirmed the moment; only for neutral or happy moments, never income loss, divorce or illness. Tonight only if the core works by about 20:50: a separately seeded table of past home buyers, so the current 300 customers and every count stay the same, labelled on screen as synthetic.
+- **A 20-second spoken "your month" briefing** with ElevenLabs (a hackathon partner; `voice.speak` already exists). Only tried if we are ahead after the freeze.
+
 ## The contract between lanes
 
 `src/hack/moments.py` is the shared contract: the function names and data shapes the lanes agree to hand each other. It is written first with placeholder answers so the App and Numbers lanes can start straight away.
 
+- **`usual_month(con, as_of)`** returns each customer's regular payments: `customer_id`, `category`, `usual_day`, `usual_amount`, `last_seen`. The absence detectors, the Coming up panel and the expandable "why you see this" all use it.
 - **Word lists.** Moments: `first_salary`, `moved`, `rent_stopped`, `income_missing` (one month), `income_loss` (two months or more), `big_travel`. Decisions: `ask`, `nudge`, `protect_quietly`, `none`.
 - **`detect(con, as_of)`** returns one row per flagged customer with `customer_id`, `moment`, `since` (like `2026-05`) and `evidence` (a short text of numbers). `as_of` is the last day of a month.
 - **`respond(row, answer=None)`** returns `decision`, `message`, `why`, `benefit` ("what's in it for you"), `buttons` (the answer options, for `ask`), `staff_note` (for `protect_quietly`) and `quiet_until` (a date, after "Prefer not to say"). The decision comes from the rule table; the text from the LLM or a template; `message` is empty for `protect_quietly`.
@@ -169,10 +200,10 @@ Vision line, from the blank-slate review: *"Help me need less from you, even whe
 
 | Lane | Owns these files | First result | Joined up |
 |---|---|---|---|
-| AI feature | `src/hack/moments.py`, the plant table in `scripts/make_sample_data.py` | 19:45: answer file updated to the four decisions; one real detector (first salary) feeding one real card | 20:15: all detectors, the rule table with answers and quiet periods, LLM text with template fallback |
-| App | `app/pages/moments.py` | 19:45: the page on placeholder rows, then the first real card | 20:15: month selector, answer buttons, quiet protection view, staff note, the "Worried about money?" entry |
-| Numbers | `evals/moments_cases.csv`, `scripts/eval_moments.py` | 19:45: test cases (all 29 planted plus about 10 quiet customers, including students with a negative month) and the segment-campaign baseline | 20:30: the four measures below, cost scenario written |
-| Pitch and security | `README.md`, `docs/`, `src/hack/ask_data.py` (security fix only) | 19:45: deadline and live-pitch answers from the organisers, README draft, video shot list | 20:30: file-access fix done, repo public, Aikido baseline scan run |
+| AI feature | `src/hack/moments.py`, the plant table in `scripts/make_sample_data.py` | 19:45: answer file updated to the four decisions; `usual_month()`; one real detector (first salary) feeding one real card | 20:15: all detectors, the rule table with answers, quiet periods and one card a month, LLM text with template fallback |
+| App | `app/pages/moments.py` | 19:45: the page on placeholder rows, then the first real card | 20:15: month selector, answer buttons, quiet protection view, staff note, the "Worried about money?" entry, Coming up panel, expandable "why you see this" |
+| Numbers | `evals/moments_cases.csv`, `scripts/eval_moments.py`, `scripts/scale_run.py` | 19:45: test cases (all 29 planted plus about 10 quiet customers, including students with a negative month) and the segment-campaign baseline | 20:30: the four measures below; a scale run timing `detect()` on about 30,000 extra synthetic customers (separate random seed, written to `exports/`, never committed); cost scenario |
+| Pitch and security | `README.md`, `docs/`, `src/hack/ask_data.py` (security fix only) | 19:45: deadline and live-pitch answers from the organisers, and what KBC Mobile already offers from the KBC mentors; README draft with the honest limitations; video shot list | 20:30: file-access fix done, repo public, Aikido baseline scan run |
 
 - 21:00: feature freeze, tag the working version as `demo-ok`.
 - 21:00 to 22:15: small fixes for the Aikido findings, the "after" screenshot, record the video.
@@ -193,6 +224,7 @@ We compare the engine with an **illustrative** segment campaign (each segment ge
 | Unwanted contacts (to the 276 who should hear nothing) | 1,656 from April to September | whatever `detect()` wrongly flags; quote the real number |
 | Right next step (29 planted plus about 10 quiet) | right whenever the right answer was an offer | measured |
 | Asked before assuming (the 14 `ask` cases) | 0 of 14 | measured, quoted as a count |
+| Scale | not applicable | `detect()` timed on about 30,000 synthetic customers; the pitch says "measured on 30,000", then extrapolates to 2.3 million with the assumption written next to it |
 
 Said out loud in the video: "We planted these moments and wrote the detectors, so this shows the pipeline works; it doesn't predict real-world accuracy." The details and caveats per measure are in [customer-value.md](customer-value.md).
 
@@ -213,6 +245,7 @@ Said out loud in the video: "We planted these moments and wrote the detectors, s
 - No chatbot, no Power BI, no voice.
 - No pushed card for income loss, and no automatic changes to the customer's money (such as pausing a savings plan) without asking.
 - No unprompted insurance card after a move.
+- From Month Ahead, not tonight: the end-of-month balance forecast and its range (our data has no balances, so any number would be made up), yearly bills (they would mean regenerating the data and rechecking every demo customer), the accuracy test on past data (our spending is random by design, so the score would be meaningless), one-tap money moves (exactly what the Aikido audit tests, with no time to secure them), and product suggestions for money gaps (marketing on payment data).
 - Stretch goals, only if we are ahead at 20:30, in this order:
   1. **Senior fraud check:** an unusual large online transfer gets "That's unusual for you. Was that you?" [Yes, mine] [No, stop it] [Call me]. It covers seniors, who have no moment tonight, and would replace the big trip in the video. About 30 minutes, including a small generator addition.
   2. **Collision:** a customer who books a big trip and loses their income in the same period, where quiet protection blocks the travel tip.
@@ -230,5 +263,7 @@ Said out loud in the video: "We planted these moments and wrote the detectors, s
 ## Review history
 
 **First review** (GPT-6 Astra, through Codex): made the customer's answer the centre of the idea; moved to an "illustrative" baseline with measures fair to both sides; a missing salary gets caution first because a late salary and lost income look the same in month one; integration moved to 19:45; found the file-reading hole in "Ask your data" and the app breaking without an API key. Not taken: cutting the month selector, dropping the big trip from detection.
+
+**Month Ahead merge** (the teammate's proposal, reviewed by a second Claude session and then read in full): we kept the life-moments engine and took knowing each customer's usual month, the Coming up panel, expandable explanations, customer corrections, a cap of one card a month, a measured scale run and the honest limitations. The balance forecast went to the vision slide. ING already offers a payment forecast in the Netherlands ("Kijk vooruit"), so the forecast on its own would score low on originality; combined with confirmed life moments it is new.
 
 **Second review** (five angles: the customers, a sceptic, a Belgian fact-check, the jury, and GPT-6 Astra with only the brief; details in [customer-value.md](customer-value.md)): protection became the headline; income loss became quiet protection instead of an advisor handover (a customer who lost their job should not be reminded of it in the app); first salary and moved became questions; every card describes what was seen, never the guessed cause; "Prefer not to say" gives visible silence; no euro figures; Belgian details only when verified and only after the customer answers.

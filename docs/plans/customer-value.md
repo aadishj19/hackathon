@@ -112,6 +112,7 @@ What we can show in the demo: the customer's answer changes the next step; "Pref
 - **Senior fraud check (stretch goal):** "€2,400 left your account by online transfer. That's unusual for you. Was that you?" [Yes, mine] [No, stop it] [Call me]. Pure protection, and it covers seniors, who have no moment tonight. It needs a small generator addition and one detector, about 30 minutes. It would replace the big trip in the video.
 - **Vision slide, from Astra's blank-slate answer:** "Help me need less from you, even when that earns you less." Checking a lease before signing it, and rehearsing a family's budget before parental leave, are scenes for the vision, not for tonight.
 - **New baby** (a new child benefit payment arriving): too sensitive to nudge on; at most an ask, and not tonight.
+- **Moments the customer tells us, never guessed** (from the Month Ahead proposal): a baby on the way, buying a car, children going back to school, a planned move. Declared by the customer, they can shift what the bank prepares for the months ahead.
 - **Small business owners:** income already varies month to month, so a single bad month is noise. A two-month gap gets the same quiet protection, with answer options that fit ("unpaid invoices", "I can't work right now") if we ever add an ask.
 
 ## What we did not take
