@@ -11,7 +11,7 @@ import pandas as pd
 from pydantic import BaseModel
 
 from hack import llm
-from hack.data import describe
+from hack.data import describe_for_llm
 
 SYSTEM = """You write DuckDB SQL for a business analyst at a bank.
 Rules:
@@ -44,7 +44,7 @@ class Answer:
 
 
 def answer(con: duckdb.DuckDBPyConnection, question: str, retries: int = 1) -> Answer:
-    system = SYSTEM.format(schema=describe(con))
+    system = SYSTEM.format(schema=describe_for_llm(con))
     prompt = question
     for attempt in range(retries + 1):
         try:
