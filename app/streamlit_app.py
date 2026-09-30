@@ -99,6 +99,8 @@ with ask:
 
 
 def chat_prompt() -> str | None:
+        if result.truncated:
+            st.caption(f"Showing the first {ask_data.MAX_ROWS:,} rows of a larger result.")
     """Typed text, or a voice recording transcribed by ElevenLabs when a key is set."""
     submitted = st.chat_input(
         "Ask anything about the data or the challenge", accept_audio=voice.available()

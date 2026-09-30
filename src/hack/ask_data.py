@@ -24,6 +24,11 @@ Schema:
 {schema}"""
 
 
+# Hard cap on result rows, whatever the model's SQL says. A "show every transaction" on a
+# bank table could otherwise return millions of rows and freeze the app.
+MAX_ROWS = 10_000
+
+
 class SqlQuery(BaseModel):
     sql: str
     explanation: str
@@ -35,6 +40,7 @@ class Answer:
     sql: str
     explanation: str
     df: pd.DataFrame
+    truncated: bool = False  # True when the result had more than MAX_ROWS rows
 
 
 def answer(con: duckdb.DuckDBPyConnection, question: str, retries: int = 1) -> Answer:
@@ -48,7 +54,8 @@ def answer(con: duckdb.DuckDBPyConnection, question: str, retries: int = 1) -> A
                 raise
             continue  # an unreadable reply is usually a one-off, so ask again
         try:
-            return Answer(question, q.sql, q.explanation, run_sql(con, q.sql))
+            df = run_sql(con, q.sql, limit=MAX_ROWS + 1)  # one extra row reveals truncation
+            return Answer(question, q.sql, q.explanation, df.head(MAX_ROWS), len(df) > MAX_ROWS)
         except (duckdb.Error, ValueError) as e:
             if attempt == retries:
                 raise
@@ -57,8 +64,9 @@ def answer(con: duckdb.DuckDBPyConnection, question: str, retries: int = 1) -> A
     raise AssertionError("unreachable")
 
 
-def run_sql(con: duckdb.DuckDBPyConnection, sql: str) -> pd.DataFrame:
-    """Run model-written SQL if DuckDB parses it as exactly one SELECT statement.
+def run_sql(con: duckdb.DuckDBPyConnection, sql: str, limit: int | None = None) -> pd.DataFrame:
+    """Run model-written SQL if DuckDB parses it as exactly one SELECT statement, returning
+    at most `limit` rows (the query's own ORDER BY is kept).
 
     Demo-grade guard: it blocks writes and multiple statements, but a SELECT can still read
     local files through functions like read_csv. Fine on our laptops, not for production.
@@ -66,4 +74,5 @@ def run_sql(con: duckdb.DuckDBPyConnection, sql: str) -> pd.DataFrame:
     statements = con.extract_statements(sql)
     if len(statements) != 1 or statements[0].type != duckdb.StatementType.SELECT:
         raise ValueError("Only a single SELECT statement is allowed.")
-    return con.sql(statements[0].query).df()
+    result = con.sql(statements[0].query)
+    return (result.limit(limit) if limit else result).df()
