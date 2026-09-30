@@ -1,7 +1,5 @@
 # KBC track, Tectonic Hackathon Leuven
 
-Team repo for the [Tectonic Hackathon](https://www.tectonicconf.eu/hackathon) preselection round, Leuven, Wednesday 30 September 2026, 18:00 to 23:00. The best 16 teams per track go to the final in Ghent on 20 October.
-
 The KBC challenge brief is revealed at the start, so this repo is a problem-agnostic launchpad: load whatever data KBC gives us, put an LLM on top, and demo it. See [docs/PLAYBOOK.md](docs/PLAYBOOK.md) for the plan during the event.
 
 ## Setup (do this before 18:00)
