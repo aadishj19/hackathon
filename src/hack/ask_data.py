@@ -68,8 +68,8 @@ def run_sql(con: duckdb.DuckDBPyConnection, sql: str, limit: int | None = None) 
     """Run model-written SQL if DuckDB parses it as exactly one SELECT statement, returning
     at most `limit` rows (the query's own ORDER BY is kept).
 
-    Demo-grade guard: it blocks writes and multiple statements, but a SELECT can still read
-    local files through functions like read_csv. Fine on our laptops, not for production.
+    This blocks writes and multiple statements. Reading local files (read_csv and friends)
+    is blocked separately: data.connect turns off DuckDB's file access after loading.
     """
     statements = con.extract_statements(sql)
     if len(statements) != 1 or statements[0].type != duckdb.StatementType.SELECT:
