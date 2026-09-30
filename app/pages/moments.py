@@ -188,9 +188,11 @@ def scan(_con, as_of: date) -> tuple[pd.DataFrame, float, int]:
 
 
 @st.cache_data(max_entries=1000)
-def respond(row: tuple, answer: str | None, as_of: date) -> moments.Response:
-    """Cached, so a click elsewhere on the page never asks the LLM for the same card twice."""
-    return moments.respond(dict(row), answer, as_of)
+def respond(row: tuple, answer: str | None, as_of: date, use_llm: bool = False) -> moments.Response:
+    """Cached, so a click elsewhere on the page never asks the LLM for the same card twice.
+    Template text by default: KBC's view only needs the decision, and asking the LLM for every
+    flagged customer made the first load of a month take about a minute."""
+    return moments.respond(dict(row), answer, as_of, use_llm=use_llm)
 
 
 def response_for(row: dict, as_of: date) -> tuple[moments.Response, str | None]:
@@ -317,6 +319,10 @@ options = flagged_ids + [c for c in all_ids if c not in per_customer]
 if st.session_state.get("phone_customer") not in options:
     st.session_state["phone_customer"] = options[0] if options else None
 current = per_customer.get(st.session_state["phone_customer"])
+# LLM wording only for the one card on the phone; the decision is the same either way
+if current and not current["answer"]:
+    card_row = tuple((k, current[k]) for k in ("customer_id", "moment", "since", "evidence"))
+    current = {**current, "response": respond(card_row, None, as_of, use_llm=True)}
 
 with kbc:
     if current and current["response"].staff_note:
