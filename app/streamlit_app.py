@@ -25,11 +25,13 @@ shared_con, skipped = get_con()
 # A DuckDB connection isn't safe to share between threads, and Streamlit runs each browser
 # tab on its own thread. A cursor is a per-tab handle onto the same in-memory data. When
 # another tab reloads the data, the shared connection changes: rebuild this tab's cursor
-# and drop answers computed on the old data.
+# and drop everything based on the old data (the Ask answer, and the chat, which would
+# otherwise be sent to the LLM along with the new data).
 if st.session_state.get("con_source") is not shared_con:
     st.session_state["con_source"] = shared_con
     st.session_state["con"] = shared_con.cursor()
-    st.session_state.pop("answer", None)
+    for key in ("answer", "history", "speech"):
+        st.session_state.pop(key, None)
 con = st.session_state["con"]
 tables = data.tables(con)
 
