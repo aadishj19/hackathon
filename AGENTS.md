@@ -12,12 +12,11 @@ Five-hour hackathon project (Tectonic Hackathon, KBC track, 30 Sep 2026). The go
 - `src/hack/voice.py`: ElevenLabs speech (`voice.speak`, `voice.transcribe`); check `voice.available()` first, since the key is optional.
 - `docs/partners.md`: event partner tools (Google Cloud, ElevenLabs, Cursor, Aikido) and how each is wired in.
 - `app/streamlit_app.py`: the demo. New features go in as a new tab or a new file under `app/pages/`.
-- `notebooks/`: data exploration.
 - `src/hack/cases.py`: measure any feature on a CSV of test cases (input, expected, note) against a baseline, with accuracy and seconds per case. Costs LLM calls; run it only when asked.
 - `scripts/check.py`: pre-push check (data loads, every app tab renders, LLM reachable).
 - `scripts/eval.py` with `evals/ask_data_cases.csv`: accuracy of "Ask your data" against questions with known-correct SQL. Costs LLM calls; run it only when asked.
-- `.claude/skills/`: skills that Claude Code and Cursor load automatically. `streamlit` (version-matched Streamlit docs), `hackathon-kickoff` (briefing to plan), `hackathon-deliverables` (one-pager, pitch script, submission checklist).
-- `docs/`: the event playbook, the idea bank, and templates for the one-pager and pitch script.
+- `.claude/skills/`: skills that Claude Code and Cursor load automatically. `streamlit` (version-matched Streamlit docs), `hackathon-deliverables` (one-pager, pitch script, submission checklist).
+- `docs/`: the event playbook, the plans in `docs/plans/`, and templates for the one-pager and pitch script.
 - `.streamlit/config.toml`: app settings, including a KBC-coloured theme. Colours come from KBC's public website, not an official brand guideline; don't add KBC's logo without their permission.
 
 ## Rules

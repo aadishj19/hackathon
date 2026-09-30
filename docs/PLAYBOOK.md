@@ -12,7 +12,6 @@ Five hours goes fast. The teams that do well pick one narrow problem, show it wo
 - [x] Team size: the rules say 3 to 4 people. We are four.
 - [ ] Check the participant emails for what must be handed in. Teams elsewhere expect a short recorded video and a one-page summary alongside the repo, but nothing official confirms that for Leuven, so be ready for a live pitch as well as a video.
 - [ ] Screen recording tested on the presenting laptop (Ubuntu: Ctrl+Shift+Alt+R; Windows: Win+Alt+R).
-- [ ] Skim `docs/ideas.md` so the kickoff starts from ideas already thought through.
 
 ## Questions to ask KBC in the first 30 minutes
 
@@ -37,7 +36,7 @@ Five hours goes fast. The teams that do well pick one narrow problem, show it wo
 
 Roles aren't fixed. These are the workstreams; any of us can pick up any of them and swap when needed. With four people, pair them into four lanes: Data with Numbers (whoever makes the data also knows the right answers for the test cases), AI feature, App with Visuals, and Pitch.
 
-- **Data:** understand the tables and joins, clean them in the notebook, note data quality issues.
+- **Data:** understand the tables and joins, clean them with SQL, note data quality issues.
 - **AI feature:** prompts, `src/hack/`, the logic that makes the demo useful.
 - **App:** the Streamlit screens the judges will see.
 - **Numbers:** the business case (volume, time saved, euros) and a set of 15 to 20 test cases with known correct answers, including ambiguous ones and ones where the right outcome is to stop. Run them with `hack.cases` against today's way of doing the task, to report accuracy and time for both. ("Ask your data" has its own version: `evals/ask_data_cases.csv` plus `scripts/eval.py`.)
@@ -82,7 +81,6 @@ Claude Code and Cursor load the skills in `.claude/skills/` automatically. Ask f
 
 | When | Ask |
 |---|---|
-| 18:00, brief in hand | "Run hackathon-kickoff on this brief: ..." (paste text, attach slide photos or the PDF) |
 | Any app change | The streamlit skill loads by itself; no need to ask. |
 | 21:00 freeze | "Run hackathon-deliverables." It drafts the one-pager and pitch from what is built, then walks the hand-in checks. |
 

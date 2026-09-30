@@ -33,9 +33,8 @@ The KBC challenge brief is revealed at the start, so this repo is a problem-agno
 | `scripts/check.py` | Run before every push: data loads, every app tab renders, the LLM answers. |
 | `src/hack/cases.py` | Measure any feature on a CSV of test cases and compare it with today's way of doing the task: accuracy and seconds per case, for the pitch. |
 | `scripts/eval.py` | Accuracy of "Ask your data": runs the questions in `evals/ask_data_cases.csv` and compares against known-correct SQL. Uses LLM calls. |
-| `notebooks/explore.ipynb` | Starter notebook for exploring and cleaning data in pandas or SQL. |
-| `AGENTS.md`, `.claude/skills/` | Rules and skills for AI assistants (Claude Code, Cursor, Codex): Streamlit docs, kickoff plan, submission deliverables. |
-| `docs/` | Event playbook, idea bank, partner tools (`docs/partners.md`), one-pager and pitch script templates. |
+| `AGENTS.md`, `.claude/skills/` | Rules and skills for AI assistants (Claude Code, Cursor, Codex): Streamlit docs, submission deliverables. |
+| `docs/` | Event playbook, the plans in `docs/plans/`, partner tools (`docs/partners.md`), one-pager and pitch script templates. |
 | `.vscode/` | Recommended extensions and format-on-save for VS Code and Cursor. |
 | `data/sample/` | Synthetic bank data so everything works before the real data arrives. |
 | `data/raw/` | Where the KBC data goes. Gitignored. |
@@ -50,7 +49,7 @@ The KBC challenge brief is revealed at the start, so this repo is a problem-agno
 
 ## Power BI
 
-In the app sidebar, click "Export all tables for Power BI", or call `data.export_for_powerbi(con)` from the notebook. In Power BI Desktop, use Get data > Folder and pick `exports/`. After a re-export, press Refresh.
+In the app sidebar, click "Export all tables for Power BI", or call `data.export_for_powerbi(con)` from Python. In Power BI Desktop, use Get data > Folder and pick `exports/`. After a re-export, press Refresh.
 
 ## Git during the event
 

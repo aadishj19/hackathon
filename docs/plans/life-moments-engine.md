@@ -2,7 +2,7 @@
 
 Status: proposal for the team to agree on (30 September, updated around 19:45 with the customer-value review). Where this differs from the first tasks in `docs/PLAYBOOK.md`, this plan wins.
 
-Why a customer would want this, the five-angle review behind it, and the Belgian facts with sources are in [customer-value.md](customer-value.md). Parts of the teammate's [Month Ahead proposal](../month-ahead-kbc-idea.md) are merged in: knowing each customer's usual month, a "Coming up" panel, expandable explanations, a cap on cards, a measured scale run, and its honest limitations. Its forecast goes on the vision slide.
+Why a customer would want this, the five-angle review behind it, and the Belgian facts with sources are in [customer-value.md](customer-value.md). Parts of the teammate's Month Ahead proposal (removed from the repo once merged; it is in the git history) are merged in: knowing each customer's usual month, a "Coming up" panel, expandable explanations, a cap on cards, a measured scale run, and its honest limitations. Its forecast goes on the vision slide.
 
 ## The idea in one paragraph
 
