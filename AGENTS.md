@@ -29,6 +29,7 @@ Five-hour hackathon project (Tectonic Hackathon, KBC track, 30 Sep 2026). The go
 
 ## Working style
 
+- Plan big features before coding. If a change is more than about 30 minutes of work, touches more than two files, or changes the demo flow, first write a short plan in the chat and wait for a yes. The plan covers: what the user will see, which files change, what is faked versus real, how we'll check it works (a command or a click path), and what is deliberately left out. Keep it under 15 lines. Small fixes and changes after the 21:00 freeze skip this.
 - Read the relevant code and data before changing anything. No speculative edits to "see if it fixes it".
 - When a bug shows up in one place, check the other places that use the same pattern.
 - Explain unfamiliar terms in one plain sentence. Not everyone on the team is a software engineer.
