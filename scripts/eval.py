@@ -36,17 +36,29 @@ def normalise(value) -> str:
 def same_answer(expected: pd.DataFrame, actual: pd.DataFrame) -> bool:
     """Pass when the row counts match and each expected row's values appear in its own model
     row. Duplicates count: a model row matches only one expected row, and a value repeated
-    within an expected row must be repeated in the model row too. Extra columns are fine."""
+    within an expected row must be repeated in the model row too. Extra columns are fine.
+    Meant for small results (up to a few hundred rows), which is what eval cases should have."""
     if len(expected) != len(actual):
         return False
-    unused = [Counter(normalise(v) for v in row) for row in actual.itertuples(index=False)]
-    for row in expected.itertuples(index=False):
-        wanted = Counter(normalise(v) for v in row)
-        match = next((i for i, candidate in enumerate(unused) if wanted <= candidate), None)
-        if match is None:
-            return False
-        unused.pop(match)
-    return True
+    wanted = [Counter(normalise(v) for v in row) for row in expected.itertuples(index=False)]
+    model = [Counter(normalise(v) for v in row) for row in actual.itertuples(index=False)]
+    fits = [[j for j, m in enumerate(model) if w <= m] for w in wanted]
+    owner: dict[int, int] = {}  # model row -> the expected row it is matched to
+
+    def assign(i: int, tried: set[int]) -> bool:
+        # One-to-one matching: take a free model row that fits, or move the expected row
+        # holding it to another fitting row. Taking the first fit would fail on
+        # (a,b),(a,c) against (a,b,c),(a,b,d), although a valid pairing exists.
+        for j in fits[i]:
+            if j not in tried:
+                tried.add(j)
+                if j not in owner or assign(owner[j], tried):
+                    owner[j] = i
+                    return True
+        return False
+
+    sys.setrecursionlimit(max(sys.getrecursionlimit(), 2 * len(wanted) + 100))
+    return all(assign(i, set()) for i in range(len(wanted)))
 
 
 def main() -> None:
