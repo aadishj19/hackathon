@@ -140,7 +140,8 @@ with chat:
     if prompt := chat_prompt():
         history.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        system = "You help a team at a KBC hackathon. The available data:\n\n" + data.describe(con)
+        system = "You help a team at a KBC hackathon. The available data:\n\n"
+        system += data.describe_for_llm(con)
         with st.chat_message("assistant"), st.spinner("Thinking..."):
             try:
                 reply = llm.chat(history, system=system)

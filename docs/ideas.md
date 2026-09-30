@@ -9,7 +9,7 @@ Use this at kickoff to match the KBC challenge to an idea that is already half t
 | Cash-flow early warning for small businesses | A shop owner finds out too late that rent and VAT land in the same week | A 30-day projection chart with a warning and one suggested action (for example a short-term credit line) | Transactions data, the app's chart helper |
 | Complaint and email triage | A service team drowns in messages and urgent ones wait | Each message classified by topic, urgency and sentiment with a draft reply; a dashboard of volumes per topic | `llm.ask_json` with a Pydantic schema; the BI view in the app or Power BI |
 | Alert explainer for fraud or anti-money-laundering analysts | An analyst gets hundreds of flagged transactions and spends minutes on each | For one alert: why it was flagged, similar past cases, a suggested next step; the analyst decides | `ask_data` for the history, `llm.ask_json` for the summary |
-| Data quality copilot | A data team gets a new source and doesn't know if it can be trusted | Upload a table and get the issues (missing values, odd codes, duplicates) explained in plain language, with a SQL check for each | `data.connect()`, `data.describe()`, `llm.ask_json`; our BI and data provisioning experience |
+| Data quality copilot | A data team gets a new source and doesn't know if it can be trusted | Upload a table and get the issues (missing values, odd codes, duplicates) explained in plain language, with a SQL check for each | `data.connect()`, `data.describe_for_llm()`, `llm.ask_json`; our BI and data provisioning experience |
 
 ## Works for any idea
 
