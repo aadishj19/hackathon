@@ -54,6 +54,8 @@ How we split and swap:
 
 > For **\<user\>** who struggles with **\<problem\>**, we built **\<solution\>**, which **\<measurable result\>**.
 
+The full plan, updated after a second review, is in [plans/life-moments-engine.md](plans/life-moments-engine.md). Where it differs from this page (the pitch below, the first tasks further down), the plan wins.
+
 Chosen at kickoff:
 
 > For **KBC customers whose life just changed** (a first job, a move, money getting tight) who struggle with **a bank that only reaches them through segment-wide campaigns**, we built **a life-moments engine that spots the change in their transactions and replies with one explained, personal next step, or a human advisor when selling would be wrong**, which **catches \<X\> of \<N\> planted life moments against \<Y\> for today's segment campaign, with \<Z\> harmful offers against \<W\>**.
