@@ -4,12 +4,12 @@ Five hours goes fast. The teams that do well pick one narrow problem, show it wo
 
 ## Before 18:00
 
-- [ ] Both laptops: `uv sync`, `uv run python scripts/check.py`, the app opens.
+- [ ] Every laptop: `uv sync`, `uv run python scripts/check.py`, the app opens.
 - [ ] One working LLM key in `.env`, tested. Bring a second provider's key as backup if possible.
 - [ ] Partner tools set up per `docs/partners.md`: a Google Cloud or Gemini key, an ElevenLabs key, Cursor installed, Aikido connected to the repo.
 - [ ] Power BI Desktop installed and opens a CSV from `exports/`.
 - [ ] Phone hotspot ready in case the venue Wi-Fi is slow.
-- [ ] Team size: the rules say 3 to 4 people. Confirm with the organisers that two is fine, or find a third on site.
+- [x] Team size: the rules say 3 to 4 people. We are four.
 - [ ] Check the participant emails for what must be handed in. Teams elsewhere expect a short recorded video and a one-page summary alongside the repo, but nothing official confirms that for Leuven, so be ready for a live pitch as well as a video.
 - [ ] Screen recording tested on the presenting laptop (Ubuntu: Ctrl+Shift+Alt+R; Windows: Win+Alt+R).
 - [ ] Skim `docs/ideas.md` so the kickoff starts from ideas already thought through.
@@ -35,7 +35,7 @@ Five hours goes fast. The teams that do well pick one narrow problem, show it wo
 
 ## Who does what
 
-Roles aren't fixed. These are the workstreams; either of us can pick up any of them and swap when needed.
+Roles aren't fixed. These are the workstreams; any of us can pick up any of them and swap when needed. With four people, pair them into four lanes: Data with Numbers (whoever makes the data also knows the right answers for the test cases), AI feature, App with Visuals, and Pitch.
 
 - **Data:** understand the tables and joins, clean them in the notebook, note data quality issues.
 - **AI feature:** prompts, `src/hack/`, the logic that makes the demo useful.
@@ -47,12 +47,32 @@ Roles aren't fixed. These are the workstreams; either of us can pick up any of t
 How we split and swap:
 
 - **Check in at 18:30, 19:30, 20:30 and 21:00.** Two minutes: what's done, what's stuck, who takes what next. Re-split whenever one side is blocked or the plan changes.
-- **Say which files you're about to edit.** If the other person is in the same file, either pair on it or wait for their push.
-- **Commit and push before handing over a task**, so the other person starts from the latest version.
+- **Say which files you're about to edit.** If someone else is in the same file, either pair on it or wait for their push.
+- **Commit and push before handing over a task**, so whoever takes it starts from the latest version.
 
 ## Our one-sentence pitch
 
 > For **\<user\>** who struggles with **\<problem\>**, we built **\<solution\>**, which **\<measurable result\>**.
+
+Chosen at kickoff:
+
+> For **KBC customers whose life just changed** (a first job, a move, money getting tight) who struggle with **a bank that only reaches them through segment-wide campaigns**, we built **a life-moments engine that spots the change in their transactions and replies with one explained, personal next step, or a human advisor when selling would be wrong**, which **catches \<X\> of \<N\> planted life moments against \<Y\> for today's segment campaign, with \<Z\> harmful offers against \<W\>**.
+
+## What the brief settled
+
+- Scoring: originality 30%, technical ability 30%, fit to the case 30%, security 10% (Aikido AI code audit, screenshot before and after fixing).
+- Hand-in on Builderbase: short description, demo video under 3 minutes, public GitHub repo with a short README (what it is, how to run it, what is unfinished), Aikido screenshots.
+- No KBC dataset is provided, so we work on synthetic data. Nothing is confidential, but prompts still get derived features only, never raw transactions or IDs.
+- Still to ask the organisers: the exact submission deadline, and whether there is also a live pitch.
+
+## First task per workstream (done by the 19:30 check-in)
+
+- **Data:** extend `scripts/make_sample_data.py` so each customer has a regular monthly life (salary, rent, groceries), then plant about 20 life moments with a ground-truth file: first salary after studies, a move (rent changes or stops), salary stops with a growing shortfall, a big travel spend, plus quiet customers with no moment.
+- **AI feature:** `src/hack/moments.py`: one SQL detector per moment over all customers (cheap, runs on everyone), then `llm.ask_json` only for flagged customers, returning the message, the "why am I seeing this" evidence, and a decision of `nudge`, `ask` or `hand_to_advisor`.
+- **App:** a new "Moments" tab: a table of customers with a detected moment across the whole base, and for the selected one a phone-style card with the message and its evidence.
+- **Numbers:** `evals/moments_cases.csv` with 15 to 20 cases (ordinary, ambiguous, must-stop) and a baseline rule that sends each segment its standard campaign; both run through `hack.cases`.
+- **Visuals:** skip Power BI. At most one chart in the tab: moments detected per week.
+- **Pitch:** storyboard of the 3-minute video, README draft, and at 20:30 make the repo public and run the Aikido baseline scan so there is time to fix findings.
 
 ## Using the AI assistant during the event
 
