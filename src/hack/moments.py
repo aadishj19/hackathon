@@ -4,15 +4,21 @@ docs/plans/life-moments-engine.md and docs/plans/tasks.md.
 
     uv run python -m hack.moments      # prints usual payments, flagged customers, responses
 
-`detect()` is real: one SQL query per moment over all customers. PLACEHOLDER: `respond()` still
-uses template text until the AI lane adds LLM wording, with the templates as fallback.
+`detect()` is one SQL query per moment over all customers. `respond()` decides with the rule
+table and has the LLM write the card text, falling back to fixed templates without an API key
+or when the LLM fails.
 """
 
+import warnings
 from dataclasses import dataclass, field
 from datetime import date, timedelta
+from functools import cache
 
 import duckdb
 import pandas as pd
+from pydantic import BaseModel
+
+from hack import data, llm
 
 MOMENTS = ("first_salary", "moved", "rent_stopped", "income_missing", "income_loss", "big_travel")
 DECISIONS = ("ask", "nudge", "protect_quietly", "none")
@@ -235,9 +241,13 @@ def detect(con: duckdb.DuckDBPyConnection, as_of: date) -> pd.DataFrame:
     return found[columns].reset_index(drop=True)
 
 
-def respond(row: dict, answer: str | None = None, as_of: date = TODAY) -> Response:
+def respond(
+    row: dict, answer: str | None = None, as_of: date = TODAY, use_llm: bool = True
+) -> Response:
     """What to do for one flagged row, given the customer's answer so far (if any).
-    PLACEHOLDER text: the AI lane swaps the templates for llm.ask_json with these as fallback."""
+    The decision always comes from the rules and the answer; the LLM only writes the words on a
+    card that has not been answered yet. `use_llm=False` gives the template text straight away,
+    for when you only need the decision (for example to count messages for every customer)."""
     moment, evidence = row["moment"], row["evidence"]
     if answer in QUIET_ANSWERS:
         return Response("none", quiet_until=month_end(*_add_months(as_of, QUIET_MONTHS)))
@@ -251,13 +261,73 @@ def respond(row: dict, answer: str | None = None, as_of: date = TODAY) -> Respon
         )
     if answer:
         return Response("nudge", message=f"Thanks. Here is what helps after: {answer}.")
-    return Response(
-        decision,
-        message=_TEMPLATES[moment],
-        why=f"We saw: {evidence}.",
-        benefit=_BENEFITS[moment],
-        buttons=[*BUTTONS.get(moment, []), "Prefer not to say"] if decision == "ask" else [],
+    buttons = [*BUTTONS.get(moment, []), "Prefer not to say"] if decision == "ask" else []
+    text = CardText(
+        message=_TEMPLATES[moment], why=f"We saw: {evidence}.", benefit=_BENEFITS[moment]
     )
+    if use_llm and llm.provider() != "mock":
+        try:
+            text = _card_text(moment, evidence, *_profile(row.get("customer_id")), tuple(buttons))
+        except Exception as e:  # noqa: BLE001 - any LLM failure falls back to the template text
+            warnings.warn(f"Card text from the LLM failed, using the template: {e}", stacklevel=2)
+    return Response(
+        decision, message=text.message, why=text.why, benefit=text.benefit, buttons=buttons
+    )
+
+
+class CardText(BaseModel):
+    """The only thing the LLM writes: the words on one card."""
+
+    message: str
+    why: str
+    benefit: str
+
+
+_CARD_RULES = """You write the text of one short card in the KBC Mobile banking app (KBC is a
+Belgian bank). The bank noticed a change in the customer's own payments. Write in plain English.
+
+Rules:
+- Describe only what was seen in the payments. Never guess the cause: write "your usual rent
+  payment didn't go out", never "you moved" or "you lost your job".
+- No product offers, no sales, no congratulations, no exclamation marks, no euro amounts.
+- message: one or two short sentences. If there are answer buttons, end with a question the
+  buttons answer.
+- why: one sentence starting "We saw", saying which payments changed and since when.
+- benefit: one short sentence on what the customer gains from answering or acting.
+Keep the meaning of the example card; you may only make the wording fit this customer better."""
+
+
+@cache
+def _card_text(
+    moment: str, evidence: str, segment: str, age_band: str, buttons: tuple[str, ...]
+) -> CardText:
+    """LLM wording for one card, cached on every input, so a Streamlit rerun costs nothing.
+    Only the moment, computed numbers, segment and age band go in: no ID, name or payment rows.
+    A failure raises and is not cached, so the next call tries again."""
+    prompt = (
+        f"Change noticed: {moment.replace('_', ' ')}\n"
+        f"What the payments show: {evidence}\n"
+        f"Customer: {segment}, age {age_band}\n"
+        f"Answer buttons: {', '.join(buttons) or 'none'}\n"
+        f"Example card: {_TEMPLATES[moment]} Benefit: {_BENEFITS[moment]}"
+    )
+    text = llm.ask_json(prompt, CardText, system=_CARD_RULES)
+    if not text.message.strip() or len(text.message) > 300:
+        raise llm.LLMError(f"unusable card text: {text.message!r}")
+    return text
+
+
+@cache
+def _customers() -> dict[str, tuple[str, str]]:
+    """Segment and age band per customer, read once. `respond()` gets only the detect() row."""
+    rows = data.connect().execute("SELECT customer_id, segment, age FROM customers").fetchall()
+    return {
+        cid: (segment, f"{age // 10 * 10} to {age // 10 * 10 + 9}") for cid, segment, age in rows
+    }
+
+
+def _profile(customer_id: str | None) -> tuple[str, str]:
+    return _customers().get(customer_id, ("customer", "unknown"))
 
 
 _TEMPLATES = {
@@ -288,10 +358,14 @@ if __name__ == "__main__":
         as_of = month_end(2026, month)
         print(f"\n=== as of {as_of} ===")
         for row in detect(con, as_of).to_dict("records"):
-            r = respond(row, as_of=as_of)
+            r = respond(row, as_of=as_of, use_llm=False)
             text = r.message or r.staff_note
             print(f"{row['customer_id']} {row['moment']:<15} {r.decision:<16} {text}")
     sept = month_end(2026, 9)
+    first_salary = detect(con, sept).query("customer_id == 'C0001'").to_dict("records")[0]
+    print(
+        f"\nC0001's card with LLM wording ({llm.provider()}):\n", respond(first_salary, as_of=sept)
+    )
     quiet = respond({"moment": "rent_stopped", "evidence": ""}, "Prefer not to say", sept)
     print(f"\nC0058 answers 'Prefer not to say' in September: quiet until {quiet.quiet_until}")
     print("\nComing up for C0001 after September:\n", coming_up(con, "C0001", sept))
