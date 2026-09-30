@@ -9,9 +9,8 @@ _FROM_DOTENV: set[str] = set()  # keys the last load took from .env
 
 
 def load_env() -> None:
-    """(Re)read .env into the environment. The app's Reload button calls this, so edits to
-    .env apply without a restart, including removed or commented-out lines. Shell variables
-    still win, so `LLM_PROVIDER=mock uv run ...` keeps working."""
+    """(Re)read .env into the environment, including removed or commented-out lines. Shell
+    variables still win, so `LLM_PROVIDER=mock uv run ...` keeps working."""
     values = {
         key: value
         for key, value in dotenv_values(ROOT / ".env").items()
@@ -33,6 +32,3 @@ def env(name: str, default: str = "") -> str:
 
 def data_dir() -> Path:
     return ROOT / env("DATA_DIR", "data/sample")
-
-
-EXPORTS_DIR = ROOT / "exports"

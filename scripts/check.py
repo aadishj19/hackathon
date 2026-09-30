@@ -1,4 +1,5 @@
-"""Pre-push check: does the data load, does every app tab render, is the LLM reachable?
+"""Pre-push check: does the data load, does the app render, does the engine run, is the LLM
+reachable?
 
 Run: uv run python scripts/check.py
 Exits with an error if the app crashes, so a broken page never reaches main.
@@ -10,7 +11,7 @@ import warnings
 
 from streamlit.testing.v1 import AppTest
 
-from hack import ask_data, data, llm, voice
+from hack import data, llm, moments
 from hack.config import ROOT, data_dir
 
 
@@ -24,24 +25,19 @@ def main() -> None:
     for msg in skipped:
         print(f"  {msg}")
 
-    # Renders the app headless, the same way a browser would load it. No LLM calls happen
-    # here because nothing is typed into the app.
-    app = AppTest.from_file(str(ROOT / "app" / "streamlit_app.py"), default_timeout=60).run()
+    # Renders the app headless, the same way a browser would load it
+    app = AppTest.from_file(str(ROOT / "app" / "streamlit_app.py"), default_timeout=120).run()
     if app.exception:
         print("App: FAILED to render")
         for e in app.exception:
             print(f"  {e.value}")
         sys.exit(1)
-    print(f"App: renders, tabs {[t.label for t in app.tabs]}")
+    print(f"App: renders, metrics {[(m.label, m.value) for m in app.metric]}")
 
-    print(f"Voice (ElevenLabs): {'key set' if voice.available() else 'off, no ELEVENLABS_API_KEY'}")
+    found = moments.detect(con, moments.TODAY)
+    print(f"Engine: {len(found)} customers flagged as of {moments.TODAY}")
     print(f"LLM provider: {llm.provider()} ({llm.model_name()})")
     print(f"LLM says: {llm.ask('Reply with exactly: OK')!r}")
-    if llm.provider() == "mock" or not names:
-        print("Skipping the ask-your-data test (needs an LLM key and at least one table).")
-        return
-    result = ask_data.answer(con, f"How many rows does {names[0]} have?")
-    print(f"Text-to-SQL: {result.sql}\n{result.df.to_string(index=False)}")
 
 
 if __name__ == "__main__":

@@ -7,14 +7,14 @@ Five-hour hackathon project (Tectonic Hackathon, KBC track, 30 Sep 2026). The go
 ## Layout
 
 - `src/hack/llm.py`: the only place that talks to an LLM. Use `llm.ask`, `llm.ask_json(prompt, PydanticModel)` or `llm.chat`; never call a provider SDK directly from feature code. The provider is picked in `.env`.
-- `src/hack/data.py`: loads every file in `DATA_DIR` into an in-memory DuckDB (`data.connect()`), `data.describe()` for a schema summary people read, `data.describe_for_llm()` for anything sent to an LLM (it follows `LLM_DATA_DETAIL` and by default contains no data rows), `data.export_for_powerbi()`.
-- `src/hack/ask_data.py`: text-to-SQL over the loaded tables.
-- `src/hack/voice.py`: ElevenLabs speech (`voice.speak`, `voice.transcribe`); check `voice.available()` first, since the key is optional.
+- `src/hack/data.py`: loads every file in `DATA_DIR` into an in-memory DuckDB (`data.connect()`), then switches off DuckDB's file access.
+- `src/hack/moments.py`: the life-moments engine: `detect()` (SQL), `respond()` (rules decide, the LLM only writes card text), `coming_up()`.
 - `docs/partners.md`: event partner tools (Google Cloud, ElevenLabs, Cursor, Aikido) and how each is wired in.
-- `app/streamlit_app.py`: the demo. New features go in as a new tab or a new file under `app/pages/`.
+- `app/streamlit_app.py`: the demo, one page: KBC's view and the customer's phone.
 - `src/hack/cases.py`: measure any feature on a CSV of test cases (input, expected, note) against a baseline, with accuracy and seconds per case. Costs LLM calls; run it only when asked.
-- `scripts/check.py`: pre-push check (data loads, every app tab renders, LLM reachable).
-- `scripts/eval.py` with `evals/ask_data_cases.csv`: accuracy of "Ask your data" against questions with known-correct SQL. Costs LLM calls; run it only when asked.
+- `scripts/check.py`: pre-push check (data loads, the app renders, the engine runs, LLM reachable).
+- `scripts/eval_moments.py` with `evals/moments_cases.csv`: the engine against a segment campaign on the planted cases. No LLM calls.
+- `scripts/make_sample_data.py`: generates the synthetic data in `data/sample/` and the answers in `evals/moments_truth.csv`.
 - `.claude/skills/`: skills that Claude Code and Cursor load automatically. `streamlit` (version-matched Streamlit docs), `hackathon-deliverables` (one-pager, pitch script, submission checklist).
 - `docs/`: the event playbook, the plans in `docs/plans/`, and templates for the one-pager and pitch script.
 - `.streamlit/config.toml`: app settings, including a KBC-coloured theme. Colours come from KBC's public website, not an official brand guideline; don't add KBC's logo without their permission.
@@ -22,8 +22,8 @@ Five-hour hackathon project (Tectonic Hackathon, KBC track, 30 Sep 2026). The go
 ## Rules
 
 - Keep mock mode working: with no API key the app must still start and show data.
-- Never commit challenge data, exports or secrets. Under `data/` only `data/sample/` and `data/README.md` are tracked; under `exports/` only `exports/README.md`; `.env` never. Challenge data may be confidential.
-- Never put data rows in an LLM prompt. Build prompts about the data with `data.describe_for_llm()`, not `data.describe()` or raw query results, unless the team has confirmed the data may be shared.
+- Never commit challenge data, exports or secrets. Under `data/` only `data/sample/` and `data/README.md` are tracked; `.env` never. Challenge data may be confidential.
+- Never put data rows or customer IDs in an LLM prompt. Send only computed numbers and labels, as `moments.respond()` does.
 - Before saying something works, run `uv run python scripts/check.py` and `uv run ruff check .`, and start the app with `uv run streamlit run app/streamlit_app.py`.
 - Add dependencies with `uv add <package>`, never pip.
 - Before Streamlit work, follow `.claude/skills/streamlit/SKILL.md`. It loads the docs that match our installed Streamlit version, so it avoids deprecated APIs.
