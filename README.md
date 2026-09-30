@@ -41,7 +41,7 @@ transactions ─► usual month      each customer's regular payments (SQL)
              ─► show             KBC's view and the customer's phone (Streamlit)
 ```
 
-Rules decide, the LLM only words the card. So the LLM can never turn "stay quiet" into a loan offer, and it never sees a customer ID, raw transactions or anything a user typed.
+Rules decide, the LLM only words the card. So the LLM can never turn "stay quiet" into a loan offer, and it never sees a customer ID, raw transactions or anything a user typed. The starter-kit "Ask your data" tab runs SQL written by an LLM, so the database's file access is switched off as soon as the data is loaded: that SQL cannot read or write files on the machine.
 
 | Moment | What the data shows | Decision |
 |---|---|---|
@@ -76,7 +76,6 @@ We planted these moments and wrote the detectors, so this shows the pipeline wor
 
 ## Unfinished
 
-- **Security:** the older "Ask your data" tab (from our starter kit, not part of the demo) runs SQL written by an LLM, and DuckDB can read local files from SQL. It should be removed or have file access switched off before real use.
 - **No login.** The demo page lets anyone see any synthetic customer. Real use would sit behind KBC's authentication, with advisors seeing only their own customers.
 - **The phone is a drawing.** Nothing is sent; answers are remembered only for the browser session, not in a per-customer "moment memory".
 - **Not built tonight:** Payment watch (flag a regular bill that jumped or was charged twice, with a one-tap refund request), a consent-based "Call me back" handover to an advisor, a first-pension moment, and a balance forecast that shifts when a customer confirms a moment.
