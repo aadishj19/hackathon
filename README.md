@@ -33,6 +33,7 @@ The KBC challenge brief is revealed at the start, so this repo is a problem-agno
 | `src/hack/voice.py` | ElevenLabs voice: transcribe a spoken question, read an answer aloud. Optional. |
 | `app/streamlit_app.py` | The demo app. Settings in `.streamlit/config.toml`: a KBC-coloured theme, reachable only from your own laptop, no usage statistics sent. |
 | `scripts/check.py` | Run before every push: data loads, every app tab renders, the LLM answers. |
+| `src/hack/cases.py` | Measure any feature on a CSV of test cases and compare it with today's way of doing the task: accuracy and seconds per case, for the pitch. |
 | `scripts/eval.py` | Accuracy of "Ask your data": runs the questions in `evals/ask_data_cases.csv` and compares against known-correct SQL. Uses LLM calls. |
 | `notebooks/explore.ipynb` | Starter notebook for exploring and cleaning data in pandas or SQL. |
 | `AGENTS.md`, `.claude/skills/` | Rules and skills for AI assistants (Claude Code, Cursor, Codex): Streamlit docs, kickoff plan, submission deliverables. |

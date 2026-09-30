@@ -40,7 +40,7 @@ Roles aren't fixed. These are the workstreams; either of us can pick up any of t
 - **Data:** understand the tables and joins, clean them in the notebook, note data quality issues.
 - **AI feature:** prompts, `src/hack/`, the logic that makes the demo useful.
 - **App:** the Streamlit screens the judges will see.
-- **Numbers:** the business case (volume, time saved, euros) and a test set of 15 to 20 inputs with known correct answers, to report accuracy. For "Ask your data" that is `evals/ask_data_cases.csv` plus `scripts/eval.py`; for another feature, copy the same pattern.
+- **Numbers:** the business case (volume, time saved, euros) and a set of 15 to 20 test cases with known correct answers, including ambiguous ones and ones where the right outcome is to stop. Run them with `hack.cases` against today's way of doing the task, to report accuracy and time for both. ("Ask your data" has its own version: `evals/ask_data_cases.csv` plus `scripts/eval.py`.)
 - **Visuals:** charts in the app or a Power BI dashboard, only if the challenge calls for one.
 - **Pitch:** slides, story, demo script, timekeeping.
 
@@ -66,7 +66,7 @@ Claude Code and Cursor load the skills in `.claude/skills/` automatically. Ask f
 
 ## Pitch
 
-Structure, timings and shot list are in `docs/pitch-script-template.md`; the one-page overview is `docs/one-pager-template.md`. Whatever the format, a bank jury listens for three things: data stays protected (masked, in the EU), a person stays in control, and answers show their source (the app shows the generated SQL, for example).
+Structure, timings and shot list are in `docs/pitch-script-template.md`; the one-page overview is `docs/one-pager-template.md`. We don't know the judging criteria yet, so ask KBC at kickoff what they will score. Our working guess, to check against their answer: they care about a measured improvement for one real user, personal data staying protected, and a person staying in control of consequential decisions.
 
 ## Demo safety
 

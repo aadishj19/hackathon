@@ -13,6 +13,7 @@ Five-hour hackathon project (Tectonic Hackathon, KBC track, 30 Sep 2026). The go
 - `docs/partners.md`: event partner tools (Google Cloud, ElevenLabs, Cursor, Aikido) and how each is wired in.
 - `app/streamlit_app.py`: the demo. New features go in as a new tab or a new file under `app/pages/`.
 - `notebooks/`: data exploration.
+- `src/hack/cases.py`: measure any feature on a CSV of test cases (input, expected, note) against a baseline, with accuracy and seconds per case. Costs LLM calls; run it only when asked.
 - `scripts/check.py`: pre-push check (data loads, every app tab renders, LLM reachable).
 - `scripts/eval.py` with `evals/ask_data_cases.csv`: accuracy of "Ask your data" against questions with known-correct SQL. Costs LLM calls; run it only when asked.
 - `.claude/skills/`: skills that Claude Code and Cursor load automatically. `streamlit` (version-matched Streamlit docs), `hackathon-kickoff` (briefing to plan), `hackathon-deliverables` (one-pager, pitch script, submission checklist).
