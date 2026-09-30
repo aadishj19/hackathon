@@ -260,7 +260,11 @@ def respond(
             "If the customer gets in touch, offer help with fixed costs.",
         )
     if answer:
-        return Response("nudge", message=f"Thanks. Here is what helps after: {answer}.")
+        return Response(
+            "nudge",
+            message=FOLLOW_UPS.get((moment, answer), "Thanks, noted. Nothing changes."),
+            staff_note=_PAYMENT_PROBLEM_NOTE if answer == "Payment problem" else "",
+        )
     buttons = [*BUTTONS.get(moment, []), "Prefer not to say"] if decision == "ask" else []
     text = CardText(
         message=_TEMPLATES[moment], why=f"We saw: {evidence}.", benefit=_BENEFITS[moment]
@@ -343,6 +347,54 @@ _BENEFITS = {
     "rent_stopped": "We only help with what you tell us; nothing changes otherwise.",
     "big_travel": "Avoid paying twice for the same cover.",
 }
+
+
+# What the customer sees after answering a card (Markdown). Belgian details come only after an
+# answer, and only the ones checked against sources in docs/plans/customer-value.md.
+_MOVING_CHECKLIST = (
+    "Thanks. A short moving checklist:\n\n"
+    "- **Address:** declare your new address to your municipality within 8 working days; "
+    "a late declaration can be fined.\n"
+    "- **Fire insurance:** on a written Flemish lease, tenants must have fire and water "
+    "damage insurance.\n"
+    "- **Rent deposit:** at most 3 months' rent in Flanders (2 in Brussels and Wallonia), on a "
+    "blocked account. You can open a free rent deposit account in KBC Mobile."
+)
+FOLLOW_UPS = {
+    ("first_salary", "Finished studying, working now"): (
+        "Thanks, we've updated your profile, so no more student offers. For a first job:\n\n"
+        "- **Youth holidays:** under 25 and graduated this year? After a month of work you can "
+        "top up to 4 weeks' holiday next year, paid at 65% by the RVA (form C103).\n"
+        "- **Paid holidays:** in your first year you have few or none, because they are built "
+        "on last year's work.\n"
+        "- **Child benefit:** the Flemish Groeipakket stops once you work full time, so let "
+        "your parents know."
+    ),
+    ("first_salary", "Still studying, this is a side job"): (
+        "Thanks, noted. Nothing changes: you keep everything that comes with being a student."
+    ),
+    ("moved", "Yes, I moved"): _MOVING_CHECKLIST,
+    ("moved", "No, same place"): "Thanks, noted. Nothing changes.",
+    ("rent_stopped", "Moved"): (
+        "Thanks. Two things after moving out:\n\n"
+        "- **Address:** declare your new address to your municipality within 8 working days; "
+        "a late declaration can be fined.\n"
+        "- **Old rent deposit:** it is released only with the written agreement of you and "
+        "your landlord, or a judge's decision."
+    ),
+    ("rent_stopped", "Payment problem"): (
+        "Thanks for telling us. We won't show you any offers. What can help:\n\n"
+        "- **Overview:** the income and spending overview in KBC Mobile shows where your "
+        "money goes each month.\n"
+        "- **Subscriptions:** the subscriptions overview lists what you pay regularly, so you "
+        "can stop what you don't need.\n"
+        '- **Talk to someone:** tap "Worried about money?" and an advisor calls you back. '
+        "Nothing is shared with sales."
+    ),
+}
+_PAYMENT_PROBLEM_NOTE = (
+    "Customer reported a payment problem: hold back all offers. Do not call unless they ask."
+)
 
 
 def _add_months(d: date, n: int) -> tuple[int, int]:
