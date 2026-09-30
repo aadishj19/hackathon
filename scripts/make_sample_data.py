@@ -46,16 +46,16 @@ SPENDING = {
 NOT_CARD = ["app transfer", "online banking"]  # channels for the few purchases not paid by card
 
 # (moment, eligible segments, how many, first and last month it can start, decision, note).
-# The decision is what a good engine does: nudge with an offer, ask the customer first, hand
-# over to a person, or do nothing.
+# The decision is what a good engine does: nudge with a tip, ask the customer first, protect
+# quietly (hold back offers, say nothing), or do nothing.
 PLANTS = [
-    ("first_salary", ["student"], 5, (4, 8), "nudge",
+    ("first_salary", ["student"], 5, (4, 8), "ask",
      "first salary after studies; the customer file still says student"),
-    ("moved", ["young professional", "family"], 5, (4, 8), "nudge",
+    ("moved", ["young professional", "family"], 5, (4, 8), "ask",
      "rent up by a quarter or more, plus a furniture spend that month"),
     ("rent_stopped", ["young professional", "family", "small business"], 4, (4, 8), "ask",
      "rent stops and nothing replaces it: bought a home, moved in with someone, or behind on rent"),
-    ("income_loss", ["young professional", "family", "small business"], 5, (4, 7), "hand_to_advisor",
+    ("income_loss", ["young professional", "family", "small business"], 5, (4, 7), "protect_quietly",
      "income stops while spending goes on; no credit or sales offers"),
     ("big_travel", ["young professional", "family", "senior"], 5, (4, 9), "nudge",
      "a trip far above their usual travel spend"),

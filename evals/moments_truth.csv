@@ -1,30 +1,30 @@
 customer_id,moment,since,decision,note
-C0001,first_salary,2026-04,nudge,first salary after studies; the customer file still says student
+C0001,first_salary,2026-04,ask,first salary after studies; the customer file still says student
 C0009,late_salary,2026-04,none,"decoy: one salary a month late, then two paid together"
 C0011,big_travel,2026-05,nudge,a trip far above their usual travel spend
-C0027,income_loss,2026-05,hand_to_advisor,income stops while spending goes on; no credit or sales offers
-C0032,first_salary,2026-07,nudge,first salary after studies; the customer file still says student
-C0033,moved,2026-04,nudge,"rent up by a quarter or more, plus a furniture spend that month"
+C0027,income_loss,2026-05,protect_quietly,income stops while spending goes on; no credit or sales offers
+C0032,first_salary,2026-07,ask,first salary after studies; the customer file still says student
+C0033,moved,2026-04,ask,"rent up by a quarter or more, plus a furniture spend that month"
 C0058,rent_stopped,2026-04,ask,"rent stops and nothing replaces it: bought a home, moved in with someone, or behind on rent"
 C0086,rent_indexation,2026-05,none,"decoy: yearly rent indexation of 2 to 4 percent, not a move"
-C0091,income_loss,2026-07,hand_to_advisor,income stops while spending goes on; no credit or sales offers
+C0091,income_loss,2026-07,protect_quietly,income stops while spending goes on; no credit or sales offers
 C0106,late_salary,2026-06,none,"decoy: one salary a month late, then two paid together"
 C0123,rent_stopped,2026-07,ask,"rent stops and nothing replaces it: bought a home, moved in with someone, or behind on rent"
 C0132,rent_stopped,2026-04,ask,"rent stops and nothing replaces it: bought a home, moved in with someone, or behind on rent"
-C0134,income_loss,2026-04,hand_to_advisor,income stops while spending goes on; no credit or sales offers
-C0140,first_salary,2026-04,nudge,first salary after studies; the customer file still says student
-C0152,income_loss,2026-07,hand_to_advisor,income stops while spending goes on; no credit or sales offers
+C0134,income_loss,2026-04,protect_quietly,income stops while spending goes on; no credit or sales offers
+C0140,first_salary,2026-04,ask,first salary after studies; the customer file still says student
+C0152,income_loss,2026-07,protect_quietly,income stops while spending goes on; no credit or sales offers
 C0154,big_travel,2026-07,nudge,a trip far above their usual travel spend
 C0157,big_travel,2026-08,nudge,a trip far above their usual travel spend
 C0170,rent_indexation,2026-05,none,"decoy: yearly rent indexation of 2 to 4 percent, not a move"
 C0178,rent_stopped,2026-06,ask,"rent stops and nothing replaces it: bought a home, moved in with someone, or behind on rent"
-C0180,moved,2026-05,nudge,"rent up by a quarter or more, plus a furniture spend that month"
-C0188,moved,2026-04,nudge,"rent up by a quarter or more, plus a furniture spend that month"
-C0192,moved,2026-07,nudge,"rent up by a quarter or more, plus a furniture spend that month"
+C0180,moved,2026-05,ask,"rent up by a quarter or more, plus a furniture spend that month"
+C0188,moved,2026-04,ask,"rent up by a quarter or more, plus a furniture spend that month"
+C0192,moved,2026-07,ask,"rent up by a quarter or more, plus a furniture spend that month"
 C0226,big_travel,2026-05,nudge,a trip far above their usual travel spend
-C0233,first_salary,2026-06,nudge,first salary after studies; the customer file still says student
+C0233,first_salary,2026-06,ask,first salary after studies; the customer file still says student
 C0235,late_salary,2026-04,none,"decoy: one salary a month late, then two paid together"
-C0244,first_salary,2026-06,nudge,first salary after studies; the customer file still says student
-C0251,income_loss,2026-06,hand_to_advisor,income stops while spending goes on; no credit or sales offers
-C0254,moved,2026-08,nudge,"rent up by a quarter or more, plus a furniture spend that month"
+C0244,first_salary,2026-06,ask,first salary after studies; the customer file still says student
+C0251,income_loss,2026-06,protect_quietly,income stops while spending goes on; no credit or sales offers
+C0254,moved,2026-08,ask,"rent up by a quarter or more, plus a furniture spend that month"
 C0270,big_travel,2026-05,nudge,a trip far above their usual travel spend
