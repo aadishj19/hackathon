@@ -1,0 +1,32 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Challenge data stays local: it may be confidential. Only the synthetic sample is committed.
+data/*
+!data/README.md
+!data/sample/
+exports/*
+!exports/README.md
+*.duckdb
+*.duckdb.wal
+
+# Power BI: .pbix files are large binaries and embed the data. Share them outside git.
+*.pbix
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Personal Claude Code settings
+.claude/settings.local.json
