@@ -54,10 +54,10 @@ In the app sidebar, click "Export all tables for Power BI", or call `data.export
 
 ## Git during the event
 
-Two people, one `main` branch. Before editing a file, say so, so we don't both change it at once. Commit and push small and often (every 20 to 30 minutes), because small merges rarely conflict.
+Four people, one `main` branch. Before editing a file, say so, so two of us don't change it at once. Commit and push small and often (every 20 to 30 minutes), because small merges rarely conflict.
 
 ```bash
-git pull --rebase          # get the other person's work first
+git pull --rebase          # get everyone else's work first
 git add <files you changed>
 git commit -m "feat: short description"
 git push

@@ -40,7 +40,7 @@ Five-hour hackathon project (Tectonic Hackathon, KBC track, 30 Sep 2026). The go
 
 ## Git
 
-- Two people push to `main`. `main` must always run, because it is what we demo.
+- Four people push to `main`. `main` must always run, because it is what we demo.
 - Don't commit or push unless the user asks. Before a commit, the checks above must pass.
 - One change per commit, titled with a conventional prefix (`feat:`, `fix:`, `docs:`, `chore:`) and a plain-English description.
 - Never force-push and never rewrite history on `main`.

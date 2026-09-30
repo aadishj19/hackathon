@@ -5,7 +5,7 @@ description: Plan the build right after KBC presents its challenge. Turns briefi
 
 # Kickoff: from KBC's brief to a plan
 
-Leuven venue, Wednesday 30 September 2026, building from 18:00 until 23:00. Two people who share the work (see `docs/PLAYBOOK.md`); nobody owns a fixed role. Aim to finish this in about 15 minutes. A rough plan now beats a perfect plan at 19:00.
+Leuven venue, Wednesday 30 September 2026, building from 18:00 until 23:00. Four people who share the work (see `docs/PLAYBOOK.md`); nobody owns a fixed role. Aim to finish this in about 15 minutes. A rough plan now beats a perfect plan at 19:00.
 
 ## Pass 1: understand
 
@@ -21,7 +21,7 @@ Collect candidate ideas from the brief and from `docs/ideas.md`. Each idea is on
 |---|---|
 | Fit | Does it answer what KBC asked, in their words? |
 | Evidence | Can we show it on the data we actually have tonight, and measure that it helps? |
-| Buildable | Can two people finish it by 21:00 with this repo? |
+| Buildable | Can four people finish it by 21:00 with this repo? |
 | Visible outcome | Will the jury see someone's task get done better within about ten seconds? |
 
 Fit, Evidence and Buildable come first; novelty only breaks ties. Adding a chat box or a dashboard does not make an idea stronger. If no step genuinely needs AI, recommend the useful workflow anyway.
@@ -43,5 +43,5 @@ For the chosen idea, write:
 
 - Write the one-sentence pitch into `docs/PLAYBOOK.md`.
 - Give one concrete first task per workstream in the playbook (Data, AI feature, App, Numbers, Visuals, Pitch), each small enough to finish before the 19:30 check-in. Don't assign names; the team picks.
-- Don't split the work by background (one person builds a chat, the other a dashboard, glued together at the end). Both work on the one workflow. The data person is a natural owner of the correct definitions, the expected answers in the test cases, and the exceptions that matter.
+- Don't split the work by background (one person builds a chat, the other a dashboard, glued together at the end). Everyone works on the one workflow. The data person is a natural owner of the correct definitions, the expected answers in the test cases, and the exceptions that matter.
 - If a partner tool fits naturally, mention it (Google Cloud for the LLM, an ElevenLabs voice, an Aikido scan before submitting). Skip it if it adds risk to the demo.
