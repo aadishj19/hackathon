@@ -4,9 +4,8 @@ docs/plans/life-moments-engine.md and docs/plans/tasks.md.
 
     uv run python -m hack.moments      # prints usual payments, flagged customers, responses
 
-PLACEHOLDER: `detect()` returns fixed rows for the four demo customers and `respond()` uses
-template text, until the AI lane replaces them with SQL detectors and LLM wording. The word
-lists, the rule table, `usual_month()` and `coming_up()` are real and can be built on.
+`detect()` is real: one SQL query per moment over all customers. PLACEHOLDER: `respond()` still
+uses template text until the AI lane adds LLM wording, with the templates as fallback.
 """
 
 from dataclasses import dataclass, field
@@ -88,25 +87,152 @@ def coming_up(con: duckdb.DuckDBPyConnection, customer_id: str, as_of: date) -> 
     return pd.DataFrame(rows, columns=["date", "category", "amount_eur"]).sort_values("date")
 
 
-# PLACEHOLDER rows: the four demo customers, as the real detectors should find them.
-_DEMO = [
-    ("C0001", "first_salary", 4, 12, "salary of about €2,260 since April; before that a transfer of about €750"),
-    ("C0058", "rent_stopped", 4, 12, "rent of about €916 paid January to March; none since April"),
-    ("C0009", "income_missing", 4, 4, "no salary in April; usually about €3,150 around the 25th"),
-    ("C0134", "income_missing", 4, 4, "no salary in April; usually paid around the 25th"),
-    ("C0134", "income_loss", 5, 12, "no salary since April, two months or more; costs continue"),
-]  # fmt: skip
+# Every detector starts from one row per customer per month up to `as_of`, with zeros for a
+# month without a payment: a missing salary creates no transaction, so it has to be filled in.
+# The whole history is used, not only the last few months, so a change stays visible after it
+# happened (a move in May is still a move in September).
+_MONTHLY = """
+WITH tx AS (
+    SELECT customer_id, CAST(date_trunc('month', date) AS DATE) AS month, date, category,
+           amount_eur
+    FROM transactions
+    WHERE date <= $as_of
+),
+monthly AS (
+    SELECT c.customer_id, m.month,
+           coalesce(sum(t.amount_eur) FILTER (t.category IN ('salary', 'pension', 'transfer')), 0)
+               AS income,
+           count(t.amount_eur) FILTER (t.category = 'salary') AS salaries,
+           count(t.amount_eur) FILTER (t.category = 'transfer') AS transfers,
+           coalesce(-sum(t.amount_eur) FILTER (t.category = 'rent'), 0) AS rent,
+           coalesce(-sum(t.amount_eur) FILTER (t.category = 'travel'), 0) AS travel,
+           coalesce(-min(t.amount_eur) FILTER (t.category = 'shopping'), 0) AS biggest_purchase,
+           coalesce(-sum(t.amount_eur)
+               FILTER (t.category IN ('groceries', 'restaurants', 'shopping', 'travel')), 0)
+               AS spending
+    FROM (SELECT DISTINCT customer_id FROM tx) c
+    CROSS JOIN (SELECT DISTINCT month FROM tx) m
+    LEFT JOIN tx t ON t.customer_id = c.customer_id AND t.month = m.month
+    GROUP BY ALL
+),
+this_month AS (SELECT CAST(date_trunc('month', CAST($as_of AS DATE)) AS DATE) AS month)
+"""
+
+# One query per moment. Each returns customer_id, moment, since (a DATE, the month the change
+# started) and evidence (a short text of numbers, no names). Thresholds were checked on the
+# synthetic data: see docs/plans/handoff-ai-lane.md.
+_DETECTORS = {
+    # A student's monthly transfer from home is replaced by a salary.
+    "first_salary": """
+        , first_pay AS (
+            SELECT customer_id, min(month) AS since FROM monthly WHERE salaries > 0 GROUP BY 1
+        )
+        SELECT f.customer_id, 'first_salary' AS moment, f.since,
+               format('salary of about €{:,} since {}; before that a transfer of about €{:,}',
+                      CAST(round(avg(m.income) FILTER (m.month >= f.since AND m.salaries > 0)) AS INT),
+                      strftime(f.since, '%B'),
+                      CAST(round(avg(m.income) FILTER (m.month < f.since AND m.transfers > 0)) AS INT))
+                   AS evidence
+        FROM first_pay f JOIN monthly m USING (customer_id)
+        GROUP BY f.customer_id, f.since
+        HAVING count(*) FILTER (m.month < f.since AND m.transfers > 0 AND m.salaries = 0) > 0
+    """,
+    # Rent jumps by more than 15% from one month to the next. Normal rent never changes; the
+    # yearly indexation is 2 to 4%.
+    "moved": """
+        , steps AS (
+            SELECT *, lag(rent) OVER (PARTITION BY customer_id ORDER BY month) AS before
+            FROM monthly
+        )
+        SELECT customer_id, 'moved' AS moment, month AS since,
+               format('rent went from about €{:,} to €{:,} in {}', CAST(round(before) AS INT),
+                      CAST(round(rent) AS INT), strftime(month, '%B'))
+               || CASE WHEN biggest_purchase >= 800
+                       THEN format(', plus a one-off purchase of about €{:,} that month',
+                                   CAST(round(biggest_purchase) AS INT))
+                       ELSE '' END AS evidence
+        FROM steps
+        WHERE before > 0 AND rent > 1.15 * before
+        QUALIFY row_number() OVER (PARTITION BY customer_id ORDER BY month) = 1
+    """,
+    # Rent paid in at least two months, then none this month.
+    "rent_stopped": """
+        , paid AS (
+            SELECT customer_id, count(*) FILTER (rent > 0) AS months_paid,
+                   min(month) FILTER (rent > 0) AS first_paid,
+                   max(month) FILTER (rent > 0) AS last_paid,
+                   median(rent) FILTER (rent > 0) AS usual
+            FROM monthly GROUP BY 1
+        )
+        SELECT customer_id, 'rent_stopped' AS moment,
+               CAST(last_paid + INTERVAL 1 MONTH AS DATE) AS since,
+               format('rent of about €{:,} paid {} to {}; none since {}',
+                      CAST(round(usual) AS INT), strftime(first_paid, '%B'),
+                      strftime(last_paid, '%B'), strftime(last_paid + INTERVAL 1 MONTH, '%B'))
+                   AS evidence
+        FROM paid, this_month
+        WHERE months_paid >= 2 AND last_paid < this_month.month
+    """,
+    # No income this month after income before. One month missing is income_missing (a late
+    # salary looks the same), two months or more is income_loss. A low month does not count:
+    # small business income varies by 35% either way.
+    "income": """
+        , usual AS (
+            SELECT customer_id, mode(category) AS category, median(amount_eur) AS amount,
+                   CAST(median(dayofmonth(date)) AS INT) AS day
+            FROM tx WHERE category IN ('salary', 'pension', 'transfer') GROUP BY 1
+        ),
+        gap AS (
+            SELECT m.customer_id, max(m.month) FILTER (m.income > 0) AS last_paid,
+                   sum(m.spending) FILTER (m.month = this_month.month) AS spending_now
+            FROM monthly m, this_month GROUP BY 1
+        )
+        SELECT g.customer_id,
+               CASE WHEN date_diff('month', g.last_paid, this_month.month) = 1
+                    THEN 'income_missing' ELSE 'income_loss' END AS moment,
+               CAST(g.last_paid + INTERVAL 1 MONTH AS DATE) AS since,
+               CASE WHEN date_diff('month', g.last_paid, this_month.month) = 1
+                    THEN format('no {} in {}; usually about €{:,} around day {}', u.category,
+                                strftime(this_month.month, '%B'), CAST(round(u.amount) AS INT), u.day)
+                    ELSE format('no {} since {} ({} months); usually about €{:,} around day {}; '
+                                'everyday spending continues (about €{:,} in {})', u.category,
+                                strftime(g.last_paid + INTERVAL 1 MONTH, '%B'),
+                                date_diff('month', g.last_paid, this_month.month),
+                                CAST(round(u.amount) AS INT), u.day,
+                                CAST(round(g.spending_now) AS INT), strftime(this_month.month, '%B'))
+               END AS evidence
+        FROM gap g JOIN usual u USING (customer_id), this_month
+        WHERE g.last_paid < this_month.month
+    """,
+    # One month of travel far above anything the customer usually spends. The most recent trip
+    # counts, so a May trip is still visible in September.
+    "big_travel": """
+        SELECT customer_id, 'big_travel' AS moment, month AS since,
+               format('travel spending of about €{:,} in {}; usually about €{:,} a month',
+                      CAST(round(travel) AS INT), strftime(month, '%B'), CAST(round(usual) AS INT))
+                   AS evidence
+        FROM (SELECT *, median(travel) OVER (PARTITION BY customer_id) AS usual FROM monthly)
+        WHERE travel >= 1500
+        QUALIFY row_number() OVER (PARTITION BY customer_id ORDER BY month DESC) = 1
+    """,
+}
+
+# When a customer matches more than one moment, the first in this list wins: protection comes
+# before any question or tip, so nobody whose income stopped gets a travel nudge.
+_PRIORITY = ["income_loss", "income_missing", "rent_stopped", "moved", "first_salary", "big_travel"]
 
 
 def detect(con: duckdb.DuckDBPyConnection, as_of: date) -> pd.DataFrame:
     """One row per flagged customer as of `as_of`: customer_id, moment, since, evidence.
-    PLACEHOLDER: fixed demo rows; the AI lane replaces this with one SQL query per moment."""
-    rows = [
-        {"customer_id": cid, "moment": m, "since": f"{as_of.year}-{first:02d}", "evidence": ev}
-        for cid, m, first, last, ev in _DEMO
-        if first <= as_of.month <= last
-    ]
-    return pd.DataFrame(rows, columns=["customer_id", "moment", "since", "evidence"])
+    `as_of` is the last day of a month; only transactions up to that day are used."""
+    found = pd.concat(
+        [con.execute(_MONTHLY + sql, {"as_of": as_of}).df() for sql in _DETECTORS.values()]
+    )
+    found["since"] = pd.to_datetime(found["since"]).dt.strftime("%Y-%m")
+    found["rank"] = found["moment"].map(_PRIORITY.index)
+    found = found.sort_values(["customer_id", "rank"]).drop_duplicates("customer_id")
+    columns = ["customer_id", "moment", "since", "evidence"]
+    return found[columns].reset_index(drop=True)
 
 
 def respond(row: dict, answer: str | None = None, as_of: date = TODAY) -> Response:
