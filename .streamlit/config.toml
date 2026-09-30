@@ -1,0 +1,32 @@
+[server]
+# Only reachable from this laptop, so nobody on the venue Wi-Fi can open the app, see the
+# data or use our LLM key. To share it for one run: --server.address 0.0.0.0
+address = "localhost"
+
+[browser]
+# Don't send usage statistics to Streamlit
+gatherUsageStats = false
+
+# KBC look. Colour values are read from the design-token stylesheet on kbc.be (checked
+# 30 Sep 2026); this is not an official KBC brand guideline, and no KBC logo is used.
+# KBC's own typeface is licensed, so Figtree (free, Google Fonts) stands in.
+[theme]
+base = "light"
+# Buttons show white text; KBC's lighter blue #0097DB is too faint behind it, so buttons
+# use KBC's darker blue, which reads comfortably.
+primaryColor = "#007AB1"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F2FAFF"
+textColor = "#0D2A50"
+borderColor = "#BFDAFF"
+redColor = "#D64040"
+orangeColor = "#DC7507"
+greenColor = "#5BA215"
+blueColor = "#0097DB"
+font = "Figtree:https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap"
+headingFontWeights = [700, 700, 700, 700, 600, 600]
+baseRadius = "8px"
+buttonRadius = "full"
+# Our own order of KBC colours: brand blue and navy first, then the strongest contrasts
+chartCategoricalColors = ["#0097DB", "#0D2A50", "#008571", "#F69D14", "#EE7079", "#9FC95F", "#E9C100", "#74C8ED"]
+dataframeHeaderBackgroundColor = "#F2FAFF"
