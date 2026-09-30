@@ -15,6 +15,7 @@ Costs one or two LLM calls per case. Write cases that match the loaded data (DAT
 
 import sys
 import warnings
+from collections import Counter
 
 import pandas as pd
 
@@ -33,14 +34,19 @@ def normalise(value) -> str:
 
 
 def same_answer(expected: pd.DataFrame, actual: pd.DataFrame) -> bool:
-    """Pass when the row counts match and every expected row's values appear in some model row."""
+    """Pass when the row counts match and each expected row's values appear in its own model
+    row. Duplicates count: a model row matches only one expected row, and a value repeated
+    within an expected row must be repeated in the model row too. Extra columns are fine."""
     if len(expected) != len(actual):
         return False
-    actual_rows = [{normalise(v) for v in row} for row in actual.itertuples(index=False)]
-    return all(
-        any({normalise(v) for v in row} <= candidate for candidate in actual_rows)
-        for row in expected.itertuples(index=False)
-    )
+    unused = [Counter(normalise(v) for v in row) for row in actual.itertuples(index=False)]
+    for row in expected.itertuples(index=False):
+        wanted = Counter(normalise(v) for v in row)
+        match = next((i for i, candidate in enumerate(unused) if wanted <= candidate), None)
+        if match is None:
+            return False
+        unused.pop(match)
+    return True
 
 
 def main() -> None:
