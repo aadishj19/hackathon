@@ -23,9 +23,13 @@ def get_con():
 
 shared_con, skipped = get_con()
 # A DuckDB connection isn't safe to share between threads, and Streamlit runs each browser
-# tab on its own thread. A cursor is a per-tab handle onto the same in-memory data.
-if "con" not in st.session_state:
+# tab on its own thread. A cursor is a per-tab handle onto the same in-memory data. When
+# another tab reloads the data, the shared connection changes: rebuild this tab's cursor
+# and drop answers computed on the old data.
+if st.session_state.get("con_source") is not shared_con:
+    st.session_state["con_source"] = shared_con
     st.session_state["con"] = shared_con.cursor()
+    st.session_state.pop("answer", None)
 con = st.session_state["con"]
 tables = data.tables(con)
 
@@ -95,12 +99,12 @@ with ask:
         with st.expander("SQL"):
             st.code(result.sql, language="sql")
         auto_chart(result.df)
+        if result.truncated:
+            st.caption(f"Showing the first {ask_data.MAX_ROWS:,} rows of a larger result.")
         st.dataframe(result.df, width="stretch")
 
 
 def chat_prompt() -> str | None:
-        if result.truncated:
-            st.caption(f"Showing the first {ask_data.MAX_ROWS:,} rows of a larger result.")
     """Typed text, or a voice recording transcribed by ElevenLabs when a key is set."""
     submitted = st.chat_input(
         "Ask anything about the data or the challenge", accept_audio=voice.available()
