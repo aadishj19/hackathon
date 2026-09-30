@@ -7,7 +7,6 @@ dependencies = [
     "anthropic[vertex]",
     "openai",
     "google-genai",
-    "elevenlabs",
     "duckdb",
     "pandas",
     "pyarrow",
@@ -16,7 +15,6 @@ dependencies = [
     "pydantic",
     "python-dotenv",
     "streamlit",
-    "plotly",
 ]
 
 [dependency-groups]
