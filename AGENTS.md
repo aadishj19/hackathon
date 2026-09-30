@@ -22,7 +22,7 @@ Five-hour hackathon project (Tectonic Hackathon, KBC track, 30 Sep 2026). The go
 ## Rules
 
 - Keep mock mode working: with no API key the app must still start and show data.
-- Never commit anything under `data/` except `data/sample/`, nor `.env` or `exports/`. Challenge data may be confidential.
+- Never commit challenge data, exports or secrets. Under `data/` only `data/sample/` and `data/README.md` are tracked; under `exports/` only `exports/README.md`; `.env` never. Challenge data may be confidential.
 - Never put data rows in an LLM prompt. Build prompts about the data with `data.describe_for_llm()`, not `data.describe()` or raw query results, unless the team has confirmed the data may be shared.
 - Before saying something works, run `uv run python scripts/check.py` and `uv run ruff check .`, and start the app with `uv run streamlit run app/streamlit_app.py`.
 - Add dependencies with `uv add <package>`, never pip.
