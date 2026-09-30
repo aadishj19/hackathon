@@ -1,0 +1,10 @@
+# Keep secrets and KBC's challenge data away from Cursor's AI (chat, agent, tab completion)
+# and its code index. Cursor says this is best effort: its agent can still reach files
+# through the terminal, so never paste keys or data into a chat either.
+.env
+data/*
+!data/sample/
+!data/README.md
+exports/
+*.pbix
+*.duckdb
