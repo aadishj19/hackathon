@@ -94,3 +94,10 @@ We planted these moments and wrote the detectors, so this shows the pipeline wor
 | `scripts/check.py` | Pre-push check: data loads, the app renders, the LLM answers |
 | `docs/plans/` | The plan, the customer-value review and tonight's task list |
 | `AGENTS.md` | Rules for the AI coding assistants we used (Claude Code, Cursor) |
+
+## Team: git good
+
+- Aadish Joshi - aadishj19@gmail.com
+- Xiaofei Wang - annamsea2000@gmail.com
+- Hung Thai Nguyen - nguyenhungthai0808@gmail.com
+- Madhumitha Saravanan - madhumithasaravanann@gmail.com
