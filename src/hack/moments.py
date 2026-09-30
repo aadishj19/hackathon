@@ -179,19 +179,24 @@ _DETECTORS = {
         FROM paid, this_month
         WHERE months_paid >= 2 AND last_paid < this_month.month
     """,
-    # No income this month after income before. One month missing is income_missing (a late
-    # salary looks the same), two months or more is income_loss. A low month does not count:
-    # small business income varies by 35% either way.
+    # No real income this month after income before. One month missing is income_missing (a
+    # late salary looks the same), two months or more is income_loss. A month counts as paid
+    # only with at least half the usual monthly income: small business income varies by 35%
+    # either way, and a small transfer from a friend must not switch protection off.
     "income": """
         , usual AS (
             SELECT customer_id, mode(category) AS category, median(amount_eur) AS amount,
                    CAST(median(dayofmonth(date)) AS INT) AS day
             FROM tx WHERE category IN ('salary', 'pension', 'transfer') GROUP BY 1
         ),
+        usual_monthly AS (
+            SELECT customer_id, median(income) FILTER (income > 0) AS income
+            FROM monthly GROUP BY 1
+        ),
         gap AS (
-            SELECT m.customer_id, max(m.month) FILTER (m.income > 0) AS last_paid,
+            SELECT m.customer_id, max(m.month) FILTER (m.income >= 0.5 * um.income) AS last_paid,
                    sum(m.spending) FILTER (m.month = this_month.month) AS spending_now
-            FROM monthly m, this_month GROUP BY 1
+            FROM monthly m JOIN usual_monthly um USING (customer_id), this_month GROUP BY 1
         )
         SELECT g.customer_id,
                CASE WHEN date_diff('month', g.last_paid, this_month.month) = 1
@@ -249,9 +254,10 @@ def respond(
     card that has not been answered yet. `use_llm=False` gives the template text straight away,
     for when you only need the decision (for example to count messages for every customer)."""
     moment, evidence = row["moment"], row["evidence"]
-    if answer in QUIET_ANSWERS:
-        return Response("none", quiet_until=month_end(*_add_months(as_of, QUIET_MONTHS)))
     decision = RULES[moment]
+    # Protection comes first: no answer, not even "That's not right", switches it off
+    if decision != "protect_quietly" and answer in QUIET_ANSWERS:
+        return Response("none", quiet_until=month_end(*_add_months(as_of, QUIET_MONTHS)))
     if decision == "protect_quietly":
         return Response(
             decision,
