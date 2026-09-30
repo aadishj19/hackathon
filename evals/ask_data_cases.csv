@@ -1,0 +1,7 @@
+question,expected_sql
+How many customers are there?,SELECT COUNT(*) FROM customers
+Which customer segment has the most customers?,SELECT segment FROM customers GROUP BY segment ORDER BY COUNT(*) DESC LIMIT 1
+What is the total amount_eur of travel transactions?,"SELECT ROUND(SUM(amount_eur), 2) FROM transactions WHERE category = 'travel'"
+How many transactions are there per channel?,"SELECT channel, COUNT(*) AS n FROM transactions GROUP BY channel"
+Which city has the most customers using the mobile app?,SELECT city FROM customers WHERE has_mobile_app GROUP BY city ORDER BY COUNT(*) DESC LIMIT 1
+How many distinct customers made a transaction in September 2026?,SELECT COUNT(DISTINCT customer_id) FROM transactions WHERE date >= '2026-09-01' AND date < '2026-10-01'
