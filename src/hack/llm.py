@@ -202,7 +202,13 @@ def _gemini_contents(messages: Messages) -> list[dict]:
 def _gemini_config(system: str, **extra):
     from google.genai import types
 
-    return types.GenerateContentConfig(system_instruction=system or None, **extra)
+    # Automatic function calling (Gemini running Python tools by itself) is unused here, and
+    # leaving it on prints an SDK warning on every call
+    return types.GenerateContentConfig(
+        system_instruction=system or None,
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+        **extra,
+    )
 
 
 def _with_system(messages: Messages, system: str) -> Messages:
