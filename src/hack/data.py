@@ -9,7 +9,9 @@ CSV, Parquet, JSON and Excel are supported. Each Excel sheet becomes its own tab
 <file>_<sheet>. Table names are the file name in snake_case.
 """
 
+import codecs
 import re
+import shutil
 import warnings
 from pathlib import Path
 
@@ -115,7 +117,15 @@ def export_for_powerbi(
     written = []
     for t in names or tables(con):
         path = out / f"{t}.csv"
-        # utf-8-sig adds a byte-order mark so Power BI and Excel read accents (é, è) correctly
-        con.sql(f"SELECT * FROM {_q(t)}").df().to_csv(path, index=False, encoding="utf-8-sig")
+        part = path.with_name(path.name + ".part")
+        # DuckDB writes the CSV straight from its own copy of the table, so a table with
+        # millions of rows isn't duplicated in memory
+        target = str(part).replace("'", "''")
+        con.execute(f"COPY {_q(t)} TO '{target}' (HEADER, DELIMITER ',')")
+        # A byte-order mark in front lets Power BI and Excel read accents (é, è) correctly
+        with path.open("wb") as dst, part.open("rb") as src:
+            dst.write(codecs.BOM_UTF8)
+            shutil.copyfileobj(src, dst)
+        part.unlink()
         written.append(path)
     return written
