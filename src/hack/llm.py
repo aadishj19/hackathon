@@ -65,9 +65,7 @@ def chat(messages: Messages, system: str = "") -> str:
         _check_claude(resp)
         return "".join(b.text for b in resp.content if b.type == "text")
     if p == "gemini":
-        resp = _gemini().models.generate_content(
-            model=model_name(), contents=_gemini_contents(messages), config=_gemini_config(system)
-        )
+        resp = _gemini_generate(_gemini_contents(messages), _gemini_config(system))
         return resp.text or ""
     resp = _openai().chat.completions.create(
         model=model_name(), messages=_with_system(messages, system)
@@ -93,12 +91,9 @@ def ask_json[T: BaseModel](prompt: str, schema: type[T], system: str = "") -> T:
             raise LLMError(f"Claude returned no readable JSON (stop_reason: {resp.stop_reason}).")
         return resp.parsed_output
     if p == "gemini":
-        resp = _gemini().models.generate_content(
-            model=model_name(),
-            contents=_gemini_contents(messages),
-            config=_gemini_config(
-                system, response_mime_type="application/json", response_schema=schema
-            ),
+        resp = _gemini_generate(
+            _gemini_contents(messages),
+            _gemini_config(system, response_mime_type="application/json", response_schema=schema),
         )
         if not isinstance(resp.parsed, schema):
             raise LLMError("Gemini returned no readable JSON.")
@@ -140,9 +135,17 @@ def _claude():
 @cache
 def _gemini():
     from google import genai
+    from google.genai import types
 
+    # Retry busy (429) and overloaded (5xx) responses, which the free tier returns at peak
+    # times. The Anthropic and OpenAI SDKs already retry these by default.
+    retry = types.HttpOptions(
+        retry_options=types.HttpRetryOptions(
+            attempts=4, http_status_codes=[429, 500, 502, 503, 504]
+        )
+    )
     if env("GEMINI_API_KEY"):
-        return genai.Client(api_key=env("GEMINI_API_KEY"))
+        return genai.Client(api_key=env("GEMINI_API_KEY"), http_options=retry)
     if not env("GOOGLE_CLOUD_PROJECT"):
         raise LLMError(
             "Set GEMINI_API_KEY, or GOOGLE_CLOUD_PROJECT to use Gemini via Google Cloud."
@@ -151,6 +154,7 @@ def _gemini():
         vertexai=True,
         project=env("GOOGLE_CLOUD_PROJECT"),
         location=env("GOOGLE_CLOUD_LOCATION", "global"),
+        http_options=retry,
     )
 
 
@@ -189,6 +193,21 @@ def _claude_kwargs(system: str) -> dict:
 def _check_claude(resp) -> None:
     if resp.stop_reason == "refusal":
         raise LLMError(f"Claude declined the request: {resp.stop_details}")
+
+
+def _gemini_generate(contents: list[dict], config):
+    """Call the main Gemini model; if it is still overloaded or over quota after the SDK's
+    retries, send the same request to GEMINI_FALLBACK_MODEL (empty disables the fallback)."""
+    from google.genai import errors
+
+    main = model_name()
+    fallback = env("GEMINI_FALLBACK_MODEL", "gemini-3.5-flash-lite")
+    try:
+        return _gemini().models.generate_content(model=main, contents=contents, config=config)
+    except errors.APIError as e:
+        if e.code not in (429, 500, 502, 503, 504) or not fallback or fallback == main:
+            raise
+        return _gemini().models.generate_content(model=fallback, contents=contents, config=config)
 
 
 def _gemini_contents(messages: Messages) -> list[dict]:
