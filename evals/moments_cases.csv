@@ -1,0 +1,40 @@
+customer_id,scenario,expected_moment,expected_decision,since,case_type,note
+C0001,first_salary,first_salary,ask,2026-04,planted,first salary after studies; customer file still says student
+C0009,late_salary,none,none,2026-04,decoy,one salary arrives a month late and is caught up the following month
+C0011,big_travel,big_travel,nudge,2026-05,planted,travel spend is far above the customer's usual month
+C0027,income_loss,income_loss,protect_quietly,2026-05,planted,income stops while everyday spending continues
+C0032,first_salary,first_salary,ask,2026-07,planted,first salary after studies; customer file still says student
+C0033,moved,moved,ask,2026-04,planted,rent rises by at least 25 percent plus a large purchase
+C0058,rent_stopped,rent_stopped,ask,2026-04,planted,rent stops and nothing replaces it
+C0086,rent_indexation,none,none,2026-05,decoy,rent rises by only 2 to 4 percent
+C0091,income_loss,income_loss,protect_quietly,2026-07,planted,income stops while everyday spending continues
+C0106,late_salary,none,none,2026-06,decoy,one salary arrives a month late and is caught up the following month
+C0123,rent_stopped,rent_stopped,ask,2026-07,planted,rent stops and nothing replaces it
+C0132,rent_stopped,rent_stopped,ask,2026-04,planted,rent stops and nothing replaces it
+C0134,income_loss,income_loss,protect_quietly,2026-04,planted,income stops while everyday spending continues
+C0140,first_salary,first_salary,ask,2026-04,planted,first salary after studies; customer file still says student
+C0152,income_loss,income_loss,protect_quietly,2026-07,planted,income stops while everyday spending continues
+C0154,big_travel,big_travel,nudge,2026-07,planted,travel spend is far above the customer's usual month
+C0157,big_travel,big_travel,nudge,2026-08,planted,travel spend is far above the customer's usual month
+C0170,rent_indexation,none,none,2026-05,decoy,rent rises by only 2 to 4 percent
+C0178,rent_stopped,rent_stopped,ask,2026-06,planted,rent stops and nothing replaces it
+C0180,moved,moved,ask,2026-05,planted,rent rises by at least 25 percent plus a large purchase
+C0188,moved,moved,ask,2026-04,planted,rent rises by at least 25 percent plus a large purchase
+C0192,moved,moved,ask,2026-07,planted,rent rises by at least 25 percent plus a large purchase
+C0226,big_travel,big_travel,nudge,2026-05,planted,travel spend is far above the customer's usual month
+C0233,first_salary,first_salary,ask,2026-06,planted,first salary after studies; customer file still says student
+C0235,late_salary,none,none,2026-04,decoy,one salary arrives a month late and is caught up the following month
+C0244,first_salary,first_salary,ask,2026-06,planted,first salary after studies; customer file still says student
+C0251,income_loss,income_loss,protect_quietly,2026-06,planted,income stops while everyday spending continues
+C0254,moved,moved,ask,2026-08,planted,rent rises by at least 25 percent plus a large purchase
+C0270,big_travel,big_travel,nudge,2026-05,planted,travel spend is far above the customer's usual month
+C0006,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0007,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0028,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0030,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0050,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0051,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0064,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0073,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0077,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
+C0081,negative_month_student,none,none,,quiet_control,student with at least one negative-net month but no planted life moment
