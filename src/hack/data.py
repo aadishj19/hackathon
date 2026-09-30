@@ -103,8 +103,15 @@ def describe(con: duckdb.DuckDBPyConnection, sample_rows: int = 3) -> str:
 def export_for_powerbi(
     con: duckdb.DuckDBPyConnection, names: list[str] | None = None, out: Path = EXPORTS_DIR
 ) -> list[Path]:
-    """Write tables as CSV for Power BI (Get data > Text/CSV, or Folder for all at once)."""
+    """Write tables as CSV for Power BI (Get data > Text/CSV, or Folder for all at once).
+
+    A full export (no `names`) first deletes the CSVs already in `out`, so a Power BI folder
+    import never mixes in tables from an earlier dataset, such as the sample data.
+    """
     out.mkdir(parents=True, exist_ok=True)
+    if names is None:
+        for old in out.glob("*.csv"):
+            old.unlink()
     written = []
     for t in names or tables(con):
         path = out / f"{t}.csv"
